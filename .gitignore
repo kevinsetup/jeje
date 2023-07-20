@@ -1,8 +1,9 @@
 # .NET Core Build Output
 bin/
 obj/
-
+*.suo
 # .NET Core Visual Studio Files
+vs/
 .vs/
 *.suo
 *.user
@@ -46,3 +47,6 @@ appsettings*.json
 # Editor-specific files
 *~
 *.swp
+.vs/backendpedidofigueri/v17/.suo
+.vs/backendpedidofigueri/v17/.suo
+.vs/backendpedidofigueri/v17/.suo

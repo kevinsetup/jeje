@@ -237,7 +237,7 @@ namespace backendpedidofigueri.Controllers.Login
               var user = new User
               {
                 Uuid = infoUser.Uuid.ToString(),
-                Role = infoUser.Rol,
+                Role = "admin",
                 Data = new UserData
                 {
                   DisplayName = infoUser.DisplayName,
