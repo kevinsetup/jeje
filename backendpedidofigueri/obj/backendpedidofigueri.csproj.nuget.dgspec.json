@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\kevin\\source\\repos\\backendpedidofigueri\\backendpedidofigueri\\backendpedidofigueri.csproj": {}
+    "C:\\Users\\wekys\\Documents\\GitHub\\backendFigueriPedidos\\backendpedidofigueri\\backendpedidofigueri.csproj": {}
   },
   "projects": {
-    "C:\\Users\\kevin\\source\\repos\\backendpedidofigueri\\backendpedidofigueri\\backendpedidofigueri.csproj": {
+    "C:\\Users\\wekys\\Documents\\GitHub\\backendFigueriPedidos\\backendpedidofigueri\\backendpedidofigueri.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\kevin\\source\\repos\\backendpedidofigueri\\backendpedidofigueri\\backendpedidofigueri.csproj",
+        "projectUniqueName": "C:\\Users\\wekys\\Documents\\GitHub\\backendFigueriPedidos\\backendpedidofigueri\\backendpedidofigueri.csproj",
         "projectName": "backendpedidofigueri",
-        "projectPath": "C:\\Users\\kevin\\source\\repos\\backendpedidofigueri\\backendpedidofigueri\\backendpedidofigueri.csproj",
-        "packagesPath": "C:\\Users\\kevin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\kevin\\source\\repos\\backendpedidofigueri\\backendpedidofigueri\\obj\\",
+        "projectPath": "C:\\Users\\wekys\\Documents\\GitHub\\backendFigueriPedidos\\backendpedidofigueri\\backendpedidofigueri.csproj",
+        "packagesPath": "C:\\Users\\wekys\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\wekys\\Documents\\GitHub\\backendFigueriPedidos\\backendpedidofigueri\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\kevin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\wekys\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -86,7 +86,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.100\\RuntimeIdentifierGraph.json"
         }
       }
     }

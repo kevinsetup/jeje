@@ -34,9 +34,9 @@ namespace backendpedidofigueri.Controllers.Login
 
     public class UserData
     {
-        public string DisplayName { get; set; }
-        public string PhotoURL { get; set; }
-        public string Email { get; set; }
+        public string? DisplayName { get; set; }
+        public string? PhotoURL { get; set; }
+        public string? Email { get; set; }
         public UserSettings Settings { get; set; }
         public List<string> Shortcuts { get; set; }
     }
@@ -134,27 +134,9 @@ namespace backendpedidofigueri.Controllers.Login
                     var list = roots.Select(x => ProcessNode(navigation, x)).ToList();
                     var rootsDistinct = roots.DistinctBy(c => c.NomModulo);
                     var groupby = rootsDistinct.Select(c => new { id = c.NomModulo, title = c.NomModulo, type = "collapse", icon = (c.Icon == null) ? null : c.Icon.Trim(), link = ' ', children = list.Where(x => x.id == c.NomModulo) });
-                    var user = new User
-                    {
-                        Uuid = "XgbuVEXBU5gtSKdbQRP1Zbbby1i1", // Puedes obtenerlo de tu base de datos o de cualquier otra fuente
-                        Role = "admin", // Puedes obtenerlo de tu base de datos o de cualquier otra fuente
-                        Data = new UserData
-                        {
-                            DisplayName = "Abbott Keitch", // Puedes obtenerlo de tu base de datos o de cualquier otra fuente
-                            PhotoURL = "assets/images/avatars/brian-hughes.jpg", // Puedes obtenerlo de tu base de datos o de cualquier otra fuente
-                            Email = "admin@fusetheme.com", // Puedes obtenerlo de tu base de datos o de cualquier otra fuente
-                            Settings = new UserSettings
-                            {
-                                // Rellena los ajustes del usuario aquí
-                            },
-                            Shortcuts = new List<string>
-            {
-                "apps.calendar",
-                "apps.mailbox",
-                "apps.contacts"
-            }
-                        }
-                    };
+
+                    User user = await structuredUser(IdUsuario.ToString());
+
                     return StatusCode(200, new ItemResp3
                     {
                         Status = 200,
@@ -162,13 +144,14 @@ namespace backendpedidofigueri.Controllers.Login
                         User = user,
                         access_token = bearerToken
                     });
+
                 }
                 else
                 {
                     var errorList = new List<CustomError>
-    {
-        new CustomError { Type = "email", Message = "Ha ocurrido un error" }
-    };
+                    {
+                        new CustomError { Type = "email", Message = "Ha ocurrido un error" }
+                    };
 
                     return StatusCode(200, new ItemResp2
                     {
@@ -212,27 +195,8 @@ namespace backendpedidofigueri.Controllers.Login
 
             var groupby = rootsDistinct.Select(c => new { id = c.NomModulo, title = c.NomModulo, type = "collapse", icon = (c.Icon == null) ? null : c.Icon.Trim(), link = ' ', children = list.Where(x => x.id == c.NomModulo) });
 
-            var user = new User
-            {
-                Uuid = "XgbuVEXBU5gtSKdbQRP1Zbbby1i1",
-                Role = "admin",
-                Data = new UserData
-                {
-                    DisplayName = "Abbott Keitch",
-                    PhotoURL = "assets/images/avatars/brian-hughes.jpg",
-                    Email = "admin@fusetheme.com",
-                    Settings = new UserSettings
-                    {
-                        // Rellena los ajustes del usuario aquí
-                    },
-                    Shortcuts = new List<string>
-            {
-                "apps.calendar",
-                "apps.mailbox",
-                "apps.contacts"
-            }
-                }
-            };
+            User user = await structuredUser(IdUsuario);
+
             return StatusCode(200, new ItemResp3
             {
                 Status = 200,
@@ -266,6 +230,34 @@ namespace backendpedidofigueri.Controllers.Login
             }
             return result;
         }
+        private async Task<User> structuredUser(string IdUsuario)
+        {
+              IEnumerable<InfoUser> infoUserList = (IEnumerable<InfoUser>) await context.InfoUser.FromSqlInterpolated($"Exec [login].[SP_GET_INFO_USER] @idUsuario={IdUsuario}").ToListAsync();
+              InfoUser infoUser= infoUserList.First();
+              var user = new User
+              {
+                Uuid = infoUser.Uuid.ToString(),
+                Role = infoUser.Rol,
+                Data = new UserData
+                {
+                  DisplayName = infoUser.DisplayName,
+                  PhotoURL = infoUser.PhotoUrl,
+                  Email = infoUser.Email ,
+                  Settings = new UserSettings
+                  {
+                    // Rellena los ajustes del usuario aquí
+                  },
+                  Shortcuts = new List<string>
+                    {
+                        "apps.calendar",
+                        "apps.mailbox",
+                        "apps.contacts"
+                    }
+                }
+              };
+              return user;
+        }
+
 
     }
 }

@@ -12,21 +12,21 @@ public class DbContextS : DbContext
 
     }
 
-
+    //Login
     public DbSet<Usuario> Usuario { get; set; }
-
-
     public DbSet<Navigation> Navigation { get; set; }
+    public DbSet<InfoUser> InfoUser { get; set; }
+
+  
+
+
+
+  //Administracion
 
 
 
 
-    //Administracion
-
-
-
-
-    //Compras
+  //Compras
 
 
 

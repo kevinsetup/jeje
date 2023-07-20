@@ -1,0 +1,48 @@
+# .NET Core Build Output
+bin/
+obj/
+
+# .NET Core Visual Studio Files
+.vs/
+*.suo
+*.user
+*.csproj.user
+*.pidb
+*.resharper*
+*.sln.docstates
+
+# NuGet Packages
+*.nupkg
+**/packages/*
+*.nuget.props
+*.nuget.targets
+
+# Build Results
+[Dd]ebug/
+[Rr]elease/
+[Bb]uild/
+_Output/
+
+# Other Miscellaneous Files
+*.log
+*.vsix
+*.cache
+*.json.user
+Thumbs.db
+*.sln.ide
+
+# Environment Files
+appsettings*.json
+
+# Visual Studio Code Specific
+.vscode/
+
+# Rider specific
+.idea/
+
+# macOS Specific Files
+.DS_Store
+
+# Editor-specific files
+*~
+*.swp
