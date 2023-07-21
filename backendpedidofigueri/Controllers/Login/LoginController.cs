@@ -73,11 +73,13 @@ namespace backendpedidofigueri.Controllers.Login
     }
     public class NavigationNode
     {
-        public string id { get; set; }
-        public string title { get; set; }
-        public string type { get; set; }
-        public string icon { get; set; }
-        public string url { get; set; }
+        public string? id { get; set; }
+        public string? idModulo { get; set; }
+
+        public string? title { get; set; }
+        public string? type { get; set; }
+        public string? icon { get; set; }
+        public string? url { get; set; }
         public List<NavigationNode> children { get; set; }
     }
 
@@ -191,9 +193,9 @@ namespace backendpedidofigueri.Controllers.Login
             IEnumerable<Navigation> navigation = (IEnumerable<Navigation>)await context.Navigation.FromSqlInterpolated($"Exec [login].[navegacion] @IdUsuario={IdUsuario}").ToListAsync();
             var roots = navigation.Where(x => x.IdFuncionSuper == null).ToList();
             var list = roots.Select(x => ProcessNode(navigation, x)).ToList();
-            var rootsDistinct = roots.DistinctBy(c => c.NomModulo);
+            var rootsDistinct = roots.DistinctBy(c => c.IdModulo);
 
-            var groupby = rootsDistinct.Select(c => new { id = c.NomModulo, title = c.NomModulo, type = "collapse", icon = (c.Icon == null) ? null : c.Icon.Trim(), link = ' ', children = list.Where(x => x.id == c.NomModulo) });
+            var groupby = rootsDistinct.Select(c => new { id = c.NomModulo, title = c.NomModulo, type = "collapse", icon = (c.Icon == null) ? null : c.Icon.Trim(), link = ' ', children = list.Where(x => x.idModulo == c.IdModulo.ToString()) });
 
             User user = await structuredUser(IdUsuario);
 
@@ -218,7 +220,8 @@ namespace backendpedidofigueri.Controllers.Login
 
             result = new NavigationNode
             {
-                id = node.NomModulo,
+                id = node.IdFuncion.ToString(),//IdFuncion
+                idModulo=node.IdModulo.ToString(),
                 title = node.NomFuncion,
                 type = "item",
                 icon = (node.Icon == null) ? null : node.Icon.Trim(),
@@ -226,7 +229,7 @@ namespace backendpedidofigueri.Controllers.Login
             };
             if (children.Any())
             {
-                result = new NavigationNode { id = node.NomModulo, title = node.NomFuncion, type = "collapse", icon = (node.Icon == null) ? null : node.Icon.Trim(), url = node.Ruta == null ? node.Ruta : node.Ruta.Trim(), children = children };
+                result = new NavigationNode { id = node.IdModulo.ToString(), idModulo = node.IdFuncion.ToString(), title = node.NomFuncion, type = "collapse", icon = (node.Icon == null) ? null : node.Icon.Trim(), url = node.Ruta == null ? node.Ruta : node.Ruta.Trim(), children = children };
             }
             return result;
         }
