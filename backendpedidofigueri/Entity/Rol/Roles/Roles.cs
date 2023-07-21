@@ -9,6 +9,7 @@ namespace backendpedidofigueri.Entity.Rol.Roles
         public string? desRol { get; set; }
         public int? IdTipoUsuario { get; set; }
         public bool? Estado { get; set; }
+        public string? NomTipoUsuario { get; set; }
 
     }
 }

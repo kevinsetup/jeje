@@ -2,6 +2,7 @@
 using backendpedidofigueri.Entity.Login;
 using backendpedidofigueri.Entity.Rol.Permisos;
 using backendpedidofigueri.Entity.Rol.Roles;
+using backendpedidofigueri.Entity.Rol.TipoUsuario;
 using backendpedidofigueri.Entity.Usuarios;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
@@ -21,7 +22,7 @@ public class DbContextS : DbContext
     //Roles
     public DbSet<Permiso> Permiso { get; set; }
     public DbSet<Roles> Roles { get; set; }
-
+    public DbSet<TipoUsuario> TipoUsuario { get; set; }
   
 
 
