@@ -87,5 +87,49 @@ namespace backendpedidofigueri.Controllers.Rol
           });
        
         }
+        [HttpPut("RemoveRol")]
+        public async Task<ActionResult> RemoveRol(int IdUsuario,int IdRol)
+        {
+       
+        await context.Database.ExecuteSqlInterpolatedAsync($"Exec [roles].[SP_REMOVE_USUARIO_ROL] @IdUsuario={IdUsuario},@IdRol={IdRol}");
+       
+        return StatusCode(200, new ItemResp
+          {
+            status = 200,
+            message = status.DELETE,
+            data = null  
+          });
+       
+        }
+        
+        [HttpGet("GetRolByUser")]
+        public async Task<ActionResult> GetRolByUser(int IdUsuario)
+        {
+
+          var result =await context.Roles.FromSqlInterpolated($"Exec [roles].[SP_LIST_ROL_BY_USER] @IdUsuario={IdUsuario}").ToListAsync();
+
+          return StatusCode(200, new ItemResp
+          {
+            status = 200,
+            message = status.CREATE,
+            data = result 
+          });
+
+        }
+        [HttpGet("GetRolByTipoUsuario")]
+        public async Task<ActionResult> GetRolByTipoUsuario(int IdTipoUsuario)
+        {
+
+          var result =await context.Roles.FromSqlInterpolated($"Exec [roles].[SP_LIST_ROL_BY_TIPOUSUARIO] @IdTipoUsuario={IdTipoUsuario}").ToListAsync();
+
+          return StatusCode(200, new ItemResp
+          {
+            status = 200,
+            message = status.CREATE,
+            data = result  
+          });
+
+        }
+        
     }
 }

@@ -78,5 +78,33 @@ namespace backendpedidofigueri.Controllers.Rol
               data = null  // Incluimos groupby en la respuesta
             });
         }
-    }
+      [HttpPut("AssignPermiso")]
+      public async Task<ActionResult> AssignPermiso(int IdUsuario, int IdPermiso)
+      {
+
+        await context.Database.ExecuteSqlInterpolatedAsync($"Exec [roles].[SP_ASSIGN_USUARIO_PERMISO] @IdUsuario={IdUsuario},@IdPermiso={IdPermiso}");
+
+        return StatusCode(200, new ItemResp
+        {
+          status = 200,
+          message = status.CREATE,
+          data = null  // Incluimos groupby en la respuesta
+        });
+
+      }
+      [HttpPut("RemovePermiso")]
+      public async Task<ActionResult> RemovePermiso(int IdUsuario, int IdPermiso)
+      {
+
+        await context.Database.ExecuteSqlInterpolatedAsync($"Exec [roles].[SP_REMOVE_USUARIO_PERMISO] @IdUsuario={IdUsuario},@IdPermiso={IdPermiso}");
+
+        return StatusCode(200, new ItemResp
+        {
+          status = 200,
+          message = status.DELETE,
+          data = null  // Incluimos groupby en la respuesta
+        });
+
+      }
+  }
 }
