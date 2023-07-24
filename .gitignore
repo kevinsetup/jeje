@@ -50,3 +50,9 @@ appsettings*.json
 .vs/backendpedidofigueri/v17/.suo
 .vs/backendpedidofigueri/v17/.suo
 .vs/backendpedidofigueri/v17/.suo
+*.2
+*.2
+.vs/backendpedidofigueri/v17/.suo
+*.v2
+.vs/backendpedidofigueri/DesignTimeBuild/.dtbcache.v2
+*.v2
