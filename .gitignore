@@ -32,8 +32,6 @@ _Output/
 Thumbs.db
 *.sln.ide
 
-# Environment Files
-appsettings*.json
 
 # Visual Studio Code Specific
 .vscode/
