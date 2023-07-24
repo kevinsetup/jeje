@@ -8,7 +8,6 @@ namespace backendpedidofigueri.Entity.Login
     [Key]
     public int Uuid { get; set; }
     public string? DisplayName { get; set; }
-    public string? Rol { get; set; }
     public string? PhotoUrl { get; set; }
     public string? Email { get; set; }
 

@@ -12,6 +12,7 @@ namespace backendpedidofigueri.Entity.Rol.Vendedor
     public string? Telefono { get; set; }
     public string? Direccion { get; set; }
     public string? IdCliente { get; set; }
+    public string? NombreEmpresa { get; set; }
 
   }
 }

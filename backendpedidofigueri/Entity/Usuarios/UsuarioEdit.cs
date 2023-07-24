@@ -11,7 +11,6 @@ namespace backendpedidofigueri.Entity.Usuarios
     public string? vendedor { get; set; }
     public string? login { get; set; }
     public string? estado { get; set; }
-    public string? rol { get; set; }
     public string? nombres { get; set; }
     public string? apellidos { get; set; }
 

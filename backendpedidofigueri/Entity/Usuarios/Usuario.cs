@@ -19,7 +19,6 @@ namespace backendpedidofigueri.Entity.Usuarios
 
         public string? estado { get; set; }
 
-        public int? IdRol{ get; set; }
         public int? IdTipoUsuario { get; set; }
 
     

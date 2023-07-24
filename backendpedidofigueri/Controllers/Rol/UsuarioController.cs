@@ -37,7 +37,7 @@ namespace backendpedidofigueri.Controllers.Rol
 
           usuario.Pass = Crypto.EncryptRijndael(usuario.Pass);
 
-          await context.Database.ExecuteSqlInterpolatedAsync($"Exec [roles].[SP_INSERT_USUARIO] @login={usuario.Login}, @pass={usuario.Pass}, @tipoUsuario={usuario.TipoUsuario},@idTipo={usuario.IdTipo}, @estado={usuario.estado}, @idRol={usuario.IdRol}, @idTipoUsuario={usuario.IdTipoUsuario}");
+          await context.Database.ExecuteSqlInterpolatedAsync($"Exec [roles].[SP_INSERT_USUARIO] @login={usuario.Login}, @pass={usuario.Pass}, @tipoUsuario={usuario.TipoUsuario},@idTipo={usuario.IdTipo}, @estado={usuario.estado}, @idTipoUsuario={usuario.IdTipoUsuario}");
 
           return StatusCode(200, new ItemResp
           {
@@ -53,7 +53,7 @@ namespace backendpedidofigueri.Controllers.Rol
           usuario.Pass = Crypto.EncryptRijndael(usuario.Pass);
 
 
-          await context.Database.ExecuteSqlInterpolatedAsync($"Exec [roles].[SP_EDIT_USUARIO] @idUsuario={usuario.IdUsuario},@login={usuario.Login}, @pass={usuario.Pass}, @tipoUsuario={usuario.TipoUsuario},@idTipo={usuario.IdTipo}, @estado={usuario.estado}, @idRol={usuario.IdRol}, @idTipoUsuario={usuario.IdTipoUsuario},@editPass={editPass}");
+          await context.Database.ExecuteSqlInterpolatedAsync($"Exec [roles].[SP_EDIT_USUARIO] @idUsuario={usuario.IdUsuario},@login={usuario.Login}, @pass={usuario.Pass}, @tipoUsuario={usuario.TipoUsuario},@idTipo={usuario.IdTipo}, @estado={usuario.estado}, @idTipoUsuario={usuario.IdTipoUsuario},@editPass={editPass}");
 
           return StatusCode(200, new ItemResp
           {
