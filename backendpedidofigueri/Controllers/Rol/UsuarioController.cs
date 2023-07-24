@@ -21,7 +21,7 @@ namespace backendpedidofigueri.Controllers.Rol
         [HttpGet("GetUsuarios")]
         public async Task<ActionResult> GetUsuarios()
         {
-          var result = await context.Usuario.FromSqlInterpolated($"Exec [dbo].[SP_LIST_USUARIOS]").ToListAsync();
+          var result = await context.Usuario.FromSqlInterpolated($"Exec [roles].[SP_LIST_USUARIOS]").ToListAsync();
 
           return StatusCode(200, new ItemResp
           {
@@ -37,7 +37,7 @@ namespace backendpedidofigueri.Controllers.Rol
 
           usuario.Pass = Crypto.EncryptRijndael(usuario.Pass);
 
-          await context.Database.ExecuteSqlInterpolatedAsync($"Exec [dbo].[SP_INSERT_USUARIO] @login={usuario.Login}, @pass={usuario.Pass}, @tipoUsuario={usuario.TipoUsuario},@idTipo={usuario.IdTipo}, @estado={usuario.estado}, @idRol={usuario.IdRol}, @idTipoUsuario={usuario.IdTipoUsuario}");
+          await context.Database.ExecuteSqlInterpolatedAsync($"Exec [roles].[SP_INSERT_USUARIO] @login={usuario.Login}, @pass={usuario.Pass}, @tipoUsuario={usuario.TipoUsuario},@idTipo={usuario.IdTipo}, @estado={usuario.estado}, @idRol={usuario.IdRol}, @idTipoUsuario={usuario.IdTipoUsuario}");
 
           return StatusCode(200, new ItemResp
           {
@@ -53,7 +53,7 @@ namespace backendpedidofigueri.Controllers.Rol
           usuario.Pass = Crypto.EncryptRijndael(usuario.Pass);
 
 
-          await context.Database.ExecuteSqlInterpolatedAsync($"Exec [dbo].[SP_EDIT_USUARIO] @idUsuario={usuario.IdUsuario},@login={usuario.Login}, @pass={usuario.Pass}, @tipoUsuario={usuario.TipoUsuario},@idTipo={usuario.IdTipo}, @estado={usuario.estado}, @idRol={usuario.IdRol}, @idTipoUsuario={usuario.IdTipoUsuario},@editPass={editPass}");
+          await context.Database.ExecuteSqlInterpolatedAsync($"Exec [roles].[SP_EDIT_USUARIO] @idUsuario={usuario.IdUsuario},@login={usuario.Login}, @pass={usuario.Pass}, @tipoUsuario={usuario.TipoUsuario},@idTipo={usuario.IdTipo}, @estado={usuario.estado}, @idRol={usuario.IdRol}, @idTipoUsuario={usuario.IdTipoUsuario},@editPass={editPass}");
 
           return StatusCode(200, new ItemResp
           {
@@ -66,13 +66,25 @@ namespace backendpedidofigueri.Controllers.Rol
         [HttpDelete("DeleteUsuario")]
         public async Task<ActionResult> DeleteUsuario(int idUsuario)
         {
-          await context.Database.ExecuteSqlInterpolatedAsync($"Exec [dbo].[SP_DELETE_USUARIO] @idUsuario={idUsuario}");
+          await context.Database.ExecuteSqlInterpolatedAsync($"Exec [roles].[SP_DELETE_USUARIO] @idUsuario={idUsuario}");
 
           return StatusCode(200, new ItemResp
           {
             status = 200,
             message = status.DELETE,
             data = null
+          });
+        }
+        [HttpGet("GetUsuarioEdit")]
+        public async Task<ActionResult> GetUsuarioEdit(int idUsuario)
+        {
+          var result = await context.UsuarioEdit.FromSqlInterpolated($"Exec [roles].[SP_GET_USUARIOEDIT] @idUsuario={idUsuario}").ToListAsync();
+
+          return StatusCode(200, new ItemResp
+          {
+            status = 200,
+            message = status.CREATE,
+            data = result
           });
         }
   }
