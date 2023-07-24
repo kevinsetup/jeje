@@ -1,6 +1,7 @@
 ﻿
 using Azure;
 using backendpedidofigueri.Entity.Login;
+using backendpedidofigueri.Entity.Rol.Funcion;
 using backendpedidofigueri.Entity.Rol.Permisos;
 using backendpedidofigueri.Entity.Rol.Responsable;
 using backendpedidofigueri.Entity.Rol.Roles;
@@ -27,6 +28,7 @@ public class DbContextS : DbContext
     public DbSet<TipoUsuario> TipoUsuario { get; set; }
     public DbSet<Responsable> Responsable { get; set; }
     public DbSet<Vendedor> Vendedor { get; set; }
+    public DbSet<Funcion> Funcion { get; set; }
 
     //Usuario
     public DbSet<Usuario> Usuario { get; set; }
