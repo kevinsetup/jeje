@@ -106,5 +106,20 @@ namespace backendpedidofigueri.Controllers.Rol
         });
 
       }
-  }
+
+        [HttpGet("GetPermisosByUsuario")]
+        public async Task<ActionResult> GetPermisosByUsuario(int IdUsuario)
+        {
+            var result = await context.Permiso.FromSqlInterpolated($"Exec [roles].[SP_LIST_PERMISO_BY_USER] @IdUsuario={IdUsuario}").ToListAsync();
+
+
+            return StatusCode(200, new ItemResp
+            {
+                status = 200,
+                message = status.CREATE,
+                data = result  // Incluimos groupby en la respuesta
+            });
+
+        }
+    }
 }
