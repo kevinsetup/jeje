@@ -2,6 +2,7 @@
 using Azure;
 using backendpedidofigueri.Entity.Historial;
 using backendpedidofigueri.Entity.Login;
+using backendpedidofigueri.Entity.Pedidos;
 using backendpedidofigueri.Entity.Rol.Funcion;
 using backendpedidofigueri.Entity.Rol.Permisos;
 using backendpedidofigueri.Entity.Rol.Responsable;
@@ -35,14 +36,16 @@ public class DbContextS : DbContext
     public DbSet<Usuario> Usuario { get; set; }
     public DbSet<UsuarioEdit> UsuarioEdit { get; set; }
 
+    //Pedido
+    public DbSet<DetallePedidoProducto> DetallePedidoProducto { get; set; }
 
 
 
-    //Administracion
+  //Administracion
 
 
-    //Historial
-    public DbSet<HistorialSinPrecio> HistorialSinPrecio { get; set; }
+  //Historial
+  public DbSet<HistorialSinPrecio> HistorialSinPrecio { get; set; }
 
 
     //Compras
