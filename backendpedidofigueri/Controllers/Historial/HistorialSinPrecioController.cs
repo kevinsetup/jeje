@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Security.Claims;
 
 namespace backendpedidofigueri.Controllers.Historial
 {
@@ -24,36 +25,15 @@ namespace backendpedidofigueri.Controllers.Historial
             context = _context;
         }
 
-        [HttpGet("GetIdCliente")]
-        public async Task<ActionResult> GetIdCliente(string IdUsuario)
-        {
-            var output = new SqlParameter("IdCliente", SqlDbType.NVarChar, 100);
-            output.Direction = ParameterDirection.Output;
-            
-            await context.Database.ExecuteSqlInterpolatedAsync($"Exec [dbo].[sp_obtenerIdCliente] @IdUsuario={IdUsuario}, @IdCliente = {output} OUTPUT");
-
-            return StatusCode(200, new ItemResp { status = 200, message = status.CONFIRM, data = output.Value });
-
-
-        }
-
-        [HttpGet("GetIdSector")]
-        public async Task<ActionResult> GetIdSector(string IdUsuario)
-        {
-            var output = new SqlParameter("IdSector", SqlDbType.NVarChar, 100);
-            output.Direction = ParameterDirection.Output;
-
-            await context.Database.ExecuteSqlInterpolatedAsync($"Exec [dbo].[sp_obtenerIdSector] @IdUsuario={IdUsuario}, @IdSector= {output} OUTPUT");
-
-            return StatusCode(200, new ItemResp { status = 200, message = status.CONFIRM, data = output.Value });
-
-
-        }
-
+   
 
         [HttpGet("GetHistorial")]
-    public async Task<ActionResult> GetHistorial(string IdCliente, string @IdSector)
+    public async Task<ActionResult> GetHistorial()
     {
+            var IdCliente = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[2].Value;
+            var IdSector = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[3].Value;
+
+
             List<HistorialSinPrecio> data = await context.HistorialSinPrecio.FromSqlInterpolated($"Exec [dbo].[sp_listarProductoCliente] @idCliente={IdCliente},@idSector={IdSector}").ToListAsync();
 
             return StatusCode(200, new ItemResp { status = 200, message = status.CONFIRM, data = data });

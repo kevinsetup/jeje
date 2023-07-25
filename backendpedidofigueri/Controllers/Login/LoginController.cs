@@ -21,8 +21,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Xml.Linq;
 using backendpedidofigueri.Utilities;
-
-
+using Microsoft.Data.SqlClient;
 
 namespace backendpedidofigueri.Controllers.Login
 {
@@ -111,9 +110,25 @@ namespace backendpedidofigueri.Controllers.Login
 
                 if (usuario.Count() > 0)
                 {
+                    var output = new SqlParameter("IdSector", SqlDbType.NVarChar, 100);
+                    output.Direction = ParameterDirection.Output;
+                    await context.Database.ExecuteSqlInterpolatedAsync($"Exec [dbo].[sp_obtenerIdSector] @IdUsuario={usuario[0].IdUsuario}, @IdSector= {output} OUTPUT");
+
+
+                    var outputIdCliente = new SqlParameter("IdCliente", SqlDbType.NVarChar, 100);
+                    outputIdCliente.Direction = ParameterDirection.Output;
+                    await context.Database.ExecuteSqlInterpolatedAsync($"Exec [dbo].[sp_obtenerIdCliente] @IdUsuario={usuario[0].IdUsuario}, @IdCliente = {outputIdCliente} OUTPUT");
+
+
                     var claims = new ClaimsIdentity();
                     claims.AddClaim(new Claim(ClaimTypes.NameIdentifier, usuario[0].Login));
+
                     claims.AddClaim(new Claim(ClaimTypes.NameIdentifier, usuario[0].IdUsuario.ToString()));
+
+                    claims.AddClaim(new Claim(ClaimTypes.NameIdentifier, output.Value.ToString()));
+
+                    claims.AddClaim(new Claim(ClaimTypes.NameIdentifier, outputIdCliente.Value.ToString()));
+
 
                     var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("Jwt:Key")));
                     var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
