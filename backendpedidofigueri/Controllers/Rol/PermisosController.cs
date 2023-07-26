@@ -5,7 +5,9 @@ using backendpedidofigueri.Entity.Usuarios;
 using backendpedidofigueri.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using System.Security.Claims;
 
 namespace backendpedidofigueri.Controllers.Rol
@@ -118,6 +120,27 @@ namespace backendpedidofigueri.Controllers.Rol
                 status = 200,
                 message = status.CREATE,
                 data = result  // Incluimos groupby en la respuesta
+            });
+
+        }
+
+        [HttpGet("CheckUserPermission")]
+        public async Task<ActionResult> CheckUserPermission(int IdPermiso)
+        {
+            var returnValue = new SqlParameter("@HasPermission", SqlDbType.Bit)
+            {
+                Direction = ParameterDirection.Output
+            };
+            var IdUsuario = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[1].Value;
+
+            await context.Database.ExecuteSqlInterpolatedAsync($"Exec [roles].[SP_CHECK_USER_PERMISSION] @IdPermiso={IdPermiso}, @IdUsuario={IdUsuario}, @HasPermission ={returnValue} Output");
+
+
+            return StatusCode(200, new ItemResp
+            {
+                status = 200,
+                message = status.CREATE,
+                data = new { Result = returnValue.Value }
             });
 
         }
