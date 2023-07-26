@@ -5,7 +5,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Drawing;
 using System.Security.Cryptography;
+
+
+public class SavePedido
+{
+  public PedidoProducto? pedidoProducto { get; set; }
+  public List<DetallePedidoProducto>? listDetallePedidoProducto { get; set; } 
+}
 
 namespace backendpedidofigueri.Controllers.Pedidos
 {
@@ -22,28 +30,12 @@ namespace backendpedidofigueri.Controllers.Pedidos
           configuration = _configuration;
         }
 
-        [HttpPost("SaveDetallePedidoProducto")]
-        public async Task<ActionResult> SaveDetallePedidoProducto(List<DetallePedidoProducto> listDetallePedidoProducto=null)
+        [HttpPost("SavePedidoAndDetalleProducto")]
+        public async Task<ActionResult> SavePedidoAndDetalleProducto(SavePedido savepedido)
         {
-          
+          MapClassDatatable _map = new MapClassDatatable();
           //Datatable
-          DataTable dataTable = new DataTable();
-          var properties = typeof(DetallePedidoProducto).GetProperties();
-          // Agregar las columnas al DataTable basado en las propiedades de DetallePedidoProducto
-          foreach (var prop in properties)
-          {
-            dataTable.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
-          }
-          // Llenar el DataTable con los datos de la lista
-          foreach (var item in listDetallePedidoProducto)
-          {
-            var row = dataTable.NewRow();
-            foreach (var prop in properties)
-            {
-              row[prop.Name] = prop.GetValue(item) ?? DBNull.Value;
-            }
-            dataTable.Rows.Add(row);
-          }
+          DataTable dataTable = _map.MapClassToDataTable(savepedido.listDetallePedidoProducto);
           // Pasar el DataTable como parámetro al procedimiento almacenado
           var param = new SqlParameter
           {
@@ -52,12 +44,13 @@ namespace backendpedidofigueri.Controllers.Pedidos
             Value = dataTable,
             TypeName = "pedido.DetallePedidoProducto" // Reemplaza "TuTipoTabla" con el nombre correcto del tipo de tabla en la base de datos
           };
-          var a =await context.DetallePedidoProducto.FromSqlInterpolated($"Exec [pedido].[SP_INSERT_DETALLEPEDIDOPRODUCTO] @listaDetallePedidoProducto={param}").ToListAsync();
+          var a =await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_INSERT_DETALLEPEDIDOPRODUCTO] @listaDetallePedidoProducto={param},@idCliente ={ savepedido.pedidoProducto.IdCliente },@idTienda ={ savepedido.pedidoProducto.IdTienda }, @FechaPedido ={ savepedido.pedidoProducto.FechaPedido },@FechaEntrega ={ savepedido.pedidoProducto.FechaEntrega }, @valor ={ savepedido.pedidoProducto.Valor },@IGV = { savepedido.pedidoProducto.IGV },@MontoTotal = { savepedido.pedidoProducto.MontoTotal },@Descuento = { savepedido.pedidoProducto.Descuento },@Estado = { savepedido.pedidoProducto.Estado }, @IdTipoDoc ={ savepedido.pedidoProducto.IdTipoDoc }, @TotalEnviado ={ savepedido.pedidoProducto.TotalEnviado },@IdVendedor = { savepedido.pedidoProducto.IdVendedor },  @FechaRegistro ={ savepedido.pedidoProducto.FechaRegistro }, @HoraRegistro ={ savepedido.pedidoProducto.HoraRegistro }, @Nota ={ savepedido.pedidoProducto.Nota }");
+
 
           return StatusCode(200, new ItemResp
           {
             status = 200,
-            message = status.DELETE,
+            message = status.CONFIRM,
             data = a
           });
 
