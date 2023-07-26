@@ -129,6 +129,8 @@ namespace backendpedidofigueri.Controllers.Login
 
                     claims.AddClaim(new Claim(ClaimTypes.NameIdentifier, outputIdCliente.Value.ToString()));
 
+                    claims.AddClaim(new Claim(ClaimTypes.NameIdentifier, usuario[0].IdTipo));
+
 
                     var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("Jwt:Key")));
                     var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Security.Claims;
 using System.Security.Cryptography;
 
 namespace backendpedidofigueri.Controllers.Pedidos
@@ -20,6 +21,34 @@ namespace backendpedidofigueri.Controllers.Pedidos
         {
           context = _context;
           configuration = _configuration;
+        }
+
+        [HttpGet("GetPedidosByDate")]
+        public async Task<ActionResult> GetPedidosByDate(DateTime fechaInicio, DateTime fechaFin)
+        {
+            var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
+
+            var result = await context.GetPedidos.FromSqlInterpolated($"Exec [dbo].[sp_obtener_pedidos_por_fecha] @FechaInicio={fechaInicio}, @FechaFin={fechaFin},@IdVendedor={IdVendedor}").ToListAsync();
+
+            return StatusCode(200, new ItemResp
+            {
+                status = 200,
+                message = status.CREATE,
+                data = result
+            });
+        }
+
+        [HttpGet("GetDetallePedido")]
+        public async Task<ActionResult> GetDetallePedido(string IdRegistroPedido)
+        {
+            var result = await context.GetDetallePedido.FromSqlInterpolated($"Exec [pedido].[sp_obtener_detalle_pedido_por_id] @IdRegistroPedido={IdRegistroPedido}").ToListAsync();
+
+            return StatusCode(200, new ItemResp
+            {
+                status = 200,
+                message = status.CREATE,
+                data = result
+            });
         }
 
         [HttpPost("SaveDetallePedidoProducto")]

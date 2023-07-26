@@ -30,8 +30,8 @@ namespace backendpedidofigueri.Controllers.Historial
         [HttpGet("GetHistorial")]
     public async Task<ActionResult> GetHistorial()
     {
-            var IdCliente = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[2].Value;
-            var IdSector = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[3].Value;
+            var IdCliente = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[3].Value;
+            var IdSector = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[2].Value;
 
 
             List<HistorialSinPrecio> data = await context.HistorialSinPrecio.FromSqlInterpolated($"Exec [dbo].[sp_listarProductoCliente] @idCliente={IdCliente},@idSector={IdSector}").ToListAsync();

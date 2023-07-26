@@ -38,14 +38,15 @@ public class DbContextS : DbContext
 
     //Pedido
     public DbSet<DetallePedidoProducto> DetallePedidoProducto { get; set; }
+    public DbSet<GetPedidos> GetPedidos { get; set; }
+    public DbSet<GetDetallePedido> GetDetallePedido { get; set; }
 
 
+    //Administracion
 
-  //Administracion
 
-
-  //Historial
-  public DbSet<HistorialSinPrecio> HistorialSinPrecio { get; set; }
+    //Historial
+    public DbSet<HistorialSinPrecio> HistorialSinPrecio { get; set; }
 
 
     //Compras
