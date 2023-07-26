@@ -8,7 +8,8 @@ using System.Data;
 using System.Security.Claims;
 using System.Drawing;
 using System.Security.Cryptography;
-
+using System.Collections;
+using Microsoft.AspNetCore.Authorization;
 
 public class SavePedido
 {
@@ -18,6 +19,8 @@ public class SavePedido
 
 namespace backendpedidofigueri.Controllers.Pedidos
 {
+    [Authorize]
+
     [Route("api/[controller]")]
     [ApiController]
     public class PedidoController : ControllerBase
@@ -63,8 +66,18 @@ namespace backendpedidofigueri.Controllers.Pedidos
         [HttpPost("SavePedidoAndDetalleProducto")]
         public async Task<ActionResult> SavePedidoAndDetalleProducto(SavePedido savepedido)
         {
+          var IdCliente = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[3].Value;
+          var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
+          savepedido.pedidoProducto.IdVendedor= IdVendedor;
+          savepedido.pedidoProducto.IdCliente= IdCliente;
+          foreach (DetallePedidoProducto item in savepedido.listDetallePedidoProducto)
+          {
+              item.IdCliente = IdCliente;
+            
+          }
           MapClassDatatable _map = new MapClassDatatable();
           //Datatable
+
           DataTable dataTable = _map.MapClassToDataTable(savepedido.listDetallePedidoProducto);
           // Pasar el DataTable como parámetro al procedimiento almacenado
           var param = new SqlParameter
