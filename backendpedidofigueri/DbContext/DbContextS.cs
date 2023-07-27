@@ -1,5 +1,6 @@
 ﻿
 using Azure;
+using backendpedidofigueri.Entity.Credito;
 using backendpedidofigueri.Entity.Historial;
 using backendpedidofigueri.Entity.Login;
 using backendpedidofigueri.Entity.Pedidos;
@@ -49,7 +50,8 @@ public class DbContextS : DbContext
     public DbSet<HistorialSinPrecio> HistorialSinPrecio { get; set; }
 
 
-    //Compras
+    //Credito
+    public DbSet<Creditos> Credito { get; set; }
 
 
 
