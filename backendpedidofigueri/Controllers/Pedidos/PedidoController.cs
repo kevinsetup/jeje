@@ -98,5 +98,29 @@ namespace backendpedidofigueri.Controllers.Pedidos
           });
 
         }
+        [HttpPut("EditPedidoAndDetalleProducto")]
+        public async Task<ActionResult> EditPedidoAndDetalleProducto(SavePedido savepedido)
+        {
+
+          MapClassDatatable _map = new MapClassDatatable();
+          //Datatable
+          DataTable dataTable = _map.MapClassToDataTable(savepedido.listDetallePedidoProducto);
+          // Pasar el DataTable como parámetro al procedimiento almacenado
+          var param = new SqlParameter
+          {
+            ParameterName = "@listaDetallePedidoProducto",
+            SqlDbType = SqlDbType.Structured,
+            Value = dataTable,
+            TypeName = "pedido.DetallePedidoProducto" // Reemplaza "TuTipoTabla" con el nombre correcto del tipo de tabla en la base de datos
+          };
+          var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_UPDATE_DETALLEPEDIDOPRODUCTO] @listaDetallePedidoProducto={param},@IdRegistroPedido = { savepedido.pedidoProducto.IdRegistroPedido },@FechaEntrega = { savepedido.pedidoProducto.FechaEntrega }, @MontoTotal = { savepedido.pedidoProducto.MontoTotal },@Nota = { savepedido.pedidoProducto.Nota }");
+          return StatusCode(200, new ItemResp
+          {
+            status = 200,
+            message = status.CONFIRM,
+            data = a
+          });
+
+        }
   }
 }
