@@ -49,6 +49,20 @@ namespace backendpedidofigueri.Controllers.Pedidos
             });
         }
 
+
+        [HttpGet("GetPedidoById")]
+        public async Task<ActionResult> GetPedidoById(int id)
+        {
+            var result = await context.GetPedidos.FromSqlInterpolated($"Exec [dbo].[SP_GET_PEDIDO_BY_ID] @IdRegistroPedido={id}").ToListAsync();
+
+            return StatusCode(200, new ItemResp
+            {
+                status = 200,
+                message = status.CREATE,
+                data = result
+            });
+        }
+
         [HttpGet("GetDetallePedido")]
         public async Task<ActionResult> GetDetallePedido(string IdRegistroPedido)
         {
