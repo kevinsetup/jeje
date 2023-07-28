@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Security.Cryptography;
 using System.Collections;
 using Microsoft.AspNetCore.Authorization;
+using backendpedidofigueri.Entity.Rol.Vendedor;
 
 public class SavePedido
 {
@@ -51,9 +52,9 @@ namespace backendpedidofigueri.Controllers.Pedidos
 
 
         [HttpGet("GetPedidoById")]
-        public async Task<ActionResult> GetPedidoById(int id)
+        public async Task<ActionResult> GetPedidoById(int id, bool hasPermission)
         {
-            var result = await context.GetPedidos.FromSqlInterpolated($"Exec [dbo].[SP_GET_PEDIDO_BY_ID] @IdRegistroPedido={id}").ToListAsync();
+            var result = await context.GetPedidos.FromSqlInterpolated($"Exec [dbo].[SP_GET_PEDIDO_BY_ID] @IdRegistroPedido={id}, @PermisoVerMonto={hasPermission}").ToListAsync();
 
             return StatusCode(200, new ItemResp
             {
@@ -64,9 +65,9 @@ namespace backendpedidofigueri.Controllers.Pedidos
         }
 
         [HttpGet("GetDetallePedido")]
-        public async Task<ActionResult> GetDetallePedido(string IdRegistroPedido)
+        public async Task<ActionResult> GetDetallePedido(string IdRegistroPedido, bool hasPermission)
         {
-            var result = await context.GetDetallePedido.FromSqlInterpolated($"Exec [pedido].[sp_obtener_detalle_pedido_por_id] @IdRegistroPedido={IdRegistroPedido}").ToListAsync();
+            var result = await context.GetDetallePedido.FromSqlInterpolated($"Exec [pedido].[sp_obtener_detalle_pedido_por_id] @IdRegistroPedido={IdRegistroPedido}, @PermisoVerMonto={hasPermission}").ToListAsync();
 
             return StatusCode(200, new ItemResp
             {
@@ -116,11 +117,31 @@ namespace backendpedidofigueri.Controllers.Pedidos
         public async Task<ActionResult> EditPedidoAndDetalleProducto(SavePedido savepedido)
         {
 
-          MapClassDatatable _map = new MapClassDatatable();
-          //Datatable
-          DataTable dataTable = _map.MapClassToDataTable(savepedido.listDetallePedidoProducto);
-          // Pasar el DataTable como parámetro al procedimiento almacenado
-          var param = new SqlParameter
+            var IdCliente = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[3].Value;
+
+            MapClassDatatable _map = new MapClassDatatable();
+            //Datatable
+            // Pasar el DataTable como parámetro al procedimiento almacenado
+            double total = 0;
+            foreach (DetallePedidoProducto item in savepedido.listDetallePedidoProducto)
+            {
+                item.IdCliente = IdCliente;
+
+                var returnValue = new SqlParameter("@precio", SqlDbType.Float)
+                {
+                    Direction = ParameterDirection.Output
+                };
+
+                await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_GET_PRICE_BY_PRODUCT] @idCliente={IdCliente}, @idProducto={item.IdProducto}, @precio={returnValue} Output");
+                var price = returnValue.Value;
+                item.Precio = (double?)price;
+                total = (double)(total + ((double?)price * item.Cantidad));
+            }
+            savepedido.pedidoProducto.MontoTotal = total;
+
+            DataTable dataTable = _map.MapClassToDataTable(savepedido.listDetallePedidoProducto);
+
+            var param = new SqlParameter
           {
             ParameterName = "@listaDetallePedidoProducto",
             SqlDbType = SqlDbType.Structured,
