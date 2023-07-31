@@ -11,6 +11,7 @@ using System.Security.Cryptography;
 using System.Collections;
 using Microsoft.AspNetCore.Authorization;
 using backendpedidofigueri.Entity.Rol.Vendedor;
+using backendpedidofigueri.Entity.Credito;
 
 public class SavePedido
 {
@@ -77,19 +78,18 @@ namespace backendpedidofigueri.Controllers.Pedidos
             });
         }
 
-     
         [HttpPost("SavePedidoAndDetalleProducto")]
         public async Task<ActionResult> SavePedidoAndDetalleProducto(SavePedido savepedido)
         {
-          var IdCliente = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[3].Value;
-          var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
-          savepedido.pedidoProducto.IdVendedor= IdVendedor;
-          savepedido.pedidoProducto.IdCliente= IdCliente;
+            var IdCliente = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[3].Value;
+            var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
+            savepedido.pedidoProducto.IdVendedor = IdVendedor;
+            savepedido.pedidoProducto.IdCliente = IdCliente;
 
             double total = 0;
-          foreach (DetallePedidoProducto item in savepedido.listDetallePedidoProducto)
-          {
-              item.IdCliente = IdCliente;
+            foreach (DetallePedidoProducto item in savepedido.listDetallePedidoProducto)
+            {
+                item.IdCliente = IdCliente;
                 var returnValue = new SqlParameter("@precio", SqlDbType.Float)
                 {
                     Direction = ParameterDirection.Output
@@ -102,32 +102,102 @@ namespace backendpedidofigueri.Controllers.Pedidos
 
             }
             savepedido.pedidoProducto.MontoTotal = total;
+            double creditoInicial = 0;
+            double creditoUtilizado = 0;
+            double creditoRestante = 0;
+            var creditoParams = new SqlParameter("@IdCliente", SqlDbType.Int)
+            {
+                Value = IdCliente
+            };
 
+            var creditoQuery = await context.Credito
+                .FromSqlInterpolated($"EXEC pedido.sp_obtener_creditos_por_vendedor @IdCliente= {IdCliente}")
+                .ToListAsync();
 
+            if (creditoQuery.Count == 0)
+            {
+                return StatusCode(404, new ItemResp
+                {
+                    status = 404,
+                    message = "No se encontró el crédito para el vendedor especificado.",
+                    data = null
+                });
+            }
+            var credito = creditoQuery[0];
+
+            if (!double.TryParse(credito.credito_incial, out  creditoInicial))
+            {
+                return StatusCode(500, new ItemResp
+                {
+                    status = 500,
+                    message = "Error al convertir el crédito inicial a valor numérico.",
+                    data = null
+                });
+            }
+
+            if (!double.TryParse(credito.credito_utilizado, out creditoUtilizado))
+            {
+                return StatusCode(500, new ItemResp
+                {
+                    status = 500,
+                    message = "Error al convertir el crédito utilizado a valor numérico.",
+                    data = null
+                });
+            }
+            if (!double.TryParse(credito.restante, out creditoRestante))
+            {
+                return StatusCode(500, new ItemResp
+                {
+                    status = 500,
+                    message = "Error al convertir el crédito restante a valor numérico.",
+                    data = null
+                });
+            }
+            double montoTotal = savepedido.pedidoProducto.MontoTotal ?? 0.0; // Convertir MontoTotal a double
+
+            if (montoTotal > creditoInicial)
+            {
+                return StatusCode(400, new ItemResp
+                {
+                    status = 400,
+                    message = "El monto total excede el crédito inicial del vendedor.",
+                    data = null
+                });
+            }
+
+            if (montoTotal > creditoRestante)
+            {
+                return StatusCode(400, new ItemResp
+                {
+                    status = 400,
+                    message = "El monto total excede el crédito restante del vendedor.",
+                    data = null
+                });
+            }
 
             MapClassDatatable _map = new MapClassDatatable();
-          //Datatable
+            //Datatable
 
-          DataTable dataTable = _map.MapClassToDataTable(savepedido.listDetallePedidoProducto);
-          // Pasar el DataTable como parámetro al procedimiento almacenado
-          var param = new SqlParameter
-          {
-            ParameterName = "@listaDetallePedidoProducto",
-            SqlDbType = SqlDbType.Structured,
-            Value = dataTable,
-            TypeName = "pedido.DetallePedidoProducto" // Reemplaza "TuTipoTabla" con el nombre correcto del tipo de tabla en la base de datos
-          };
-          var a =await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_INSERT_DETALLEPEDIDOPRODUCTO] @listaDetallePedidoProducto={param},@idCliente ={ savepedido.pedidoProducto.IdCliente },@idTienda ={ savepedido.pedidoProducto.IdTienda }, @FechaPedido ={ savepedido.pedidoProducto.FechaPedido },@FechaEntrega ={ savepedido.pedidoProducto.FechaEntrega }, @valor ={ savepedido.pedidoProducto.Valor },@IGV = { savepedido.pedidoProducto.IGV },@MontoTotal = { savepedido.pedidoProducto.MontoTotal },@Descuento = { savepedido.pedidoProducto.Descuento },@Estado = { savepedido.pedidoProducto.Estado }, @IdTipoDoc ={ savepedido.pedidoProducto.IdTipoDoc }, @TotalEnviado ={ savepedido.pedidoProducto.TotalEnviado },@IdVendedor = { savepedido.pedidoProducto.IdVendedor },  @FechaRegistro ={ savepedido.pedidoProducto.FechaRegistro }, @HoraRegistro ={ savepedido.pedidoProducto.HoraRegistro }, @Nota ={ savepedido.pedidoProducto.Nota }");
+            DataTable dataTable = _map.MapClassToDataTable(savepedido.listDetallePedidoProducto);
+            // Pasar el DataTable como parámetro al procedimiento almacenado
+            var param = new SqlParameter
+            {
+                ParameterName = "@listaDetallePedidoProducto",
+                SqlDbType = SqlDbType.Structured,
+                Value = dataTable,
+                TypeName = "pedido.DetallePedidoProducto" // Reemplaza "TuTipoTabla" con el nombre correcto del tipo de tabla en la base de datos
+            };
+            var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_INSERT_DETALLEPEDIDOPRODUCTO] @listaDetallePedidoProducto={param},@idCliente ={savepedido.pedidoProducto.IdCliente},@idTienda ={savepedido.pedidoProducto.IdTienda}, @FechaPedido ={savepedido.pedidoProducto.FechaPedido},@FechaEntrega ={savepedido.pedidoProducto.FechaEntrega}, @valor ={savepedido.pedidoProducto.Valor},@IGV = {savepedido.pedidoProducto.IGV},@MontoTotal = {montoTotal},@Descuento = {savepedido.pedidoProducto.Descuento},@Estado = {savepedido.pedidoProducto.Estado}, @IdTipoDoc ={savepedido.pedidoProducto.IdTipoDoc}, @TotalEnviado ={savepedido.pedidoProducto.TotalEnviado},@IdVendedor = {savepedido.pedidoProducto.IdVendedor}, @FechaRegistro ={savepedido.pedidoProducto.FechaRegistro}, @HoraRegistro ={savepedido.pedidoProducto.HoraRegistro}, @Nota ={savepedido.pedidoProducto.Nota}");
 
-
-          return StatusCode(200, new ItemResp
-          {
-            status = 200,
-            message = status.CONFIRM,
-            data = a
-          });
-
+            return StatusCode(200, new ItemResp
+            {
+                status = 200,
+                message = status.CONFIRM,
+                data = a
+            });
         }
+
+
         [HttpPut("EditPedidoAndDetalleProducto")]
         public async Task<ActionResult> EditPedidoAndDetalleProducto(SavePedido savepedido)
         {
