@@ -49,7 +49,7 @@ namespace backendpedidofigueri.Controllers.Pedidos
                 data = result
             });
         }
-
+        
 
         [HttpGet("GetPedidoById")]
         public async Task<ActionResult> GetPedidoById(int id, bool hasPermission)
@@ -177,15 +177,39 @@ namespace backendpedidofigueri.Controllers.Pedidos
     {
 
       var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_UPDATE_DETALLE_CHECKOUT] @direccion ={detalleCheckout.direccion},@tipoEntrega ={detalleCheckout.tipoEntrega},@tipoPago ={detalleCheckout.tipoPago},@idPedidoProducto ={detalleCheckout.idPedidoProducto}");
-
-
       return StatusCode(200, new ItemResp
       {
         status = 200,
         message = status.CONFIRM,
         data = a
       });
+    }
+     [HttpGet("GetPedidosCanceladoByDate")]
+     public async Task<ActionResult> GetPedidosCanceladoByDate(DateTime fechaInicio, DateTime fechaFin, bool hasPermission)
+     {
+       var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
 
+       var result = await context.GetPedidos.FromSqlInterpolated($"Exec [pedido].[SP_LIST_PEDIDO_CANCELADO_BY_FECHA] @FechaInicio={fechaInicio}, @FechaFin={fechaFin},@IdVendedor={IdVendedor}, @PermisoVerMontoTotal={hasPermission} ").ToListAsync();
+
+       return StatusCode(200, new ItemResp
+       {
+         status = 200,
+         message = status.CREATE,
+         data = result
+       });
+     }
+    [HttpDelete("CancelarPedidoProducto")]
+    public async Task<ActionResult> CancelarPedidoProducto(int IdRegistroPedido)
+    {
+
+      var result = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_CANCELAR_PEDIDO] @idRegistroPedido={IdRegistroPedido} ");
+
+      return StatusCode(200, new ItemResp
+      {
+        status = 200,
+        message = status.CREATE,
+        data = result
+      });
     }
   }
 }
