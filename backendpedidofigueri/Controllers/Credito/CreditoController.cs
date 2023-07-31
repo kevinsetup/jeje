@@ -1,5 +1,6 @@
 ﻿using backendpedidofigueri.Entity.Credito;
 using backendpedidofigueri.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -8,6 +9,7 @@ namespace backendpedidofigueri.Controllers.Credito
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CreditoController : ControllerBase
     {
 
@@ -33,13 +35,13 @@ namespace backendpedidofigueri.Controllers.Credito
 
         }
         [HttpPost("RestoCredito")]
-        public async Task<ActionResult> GetResto(string CreditoUtilizado)
+        public async Task<ActionResult> GetResto([FromHeader] double  CreditoUtilizado)
         {
             var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
 
 
 
-            List<Creditos> data = await context.Credito.FromSqlInterpolated($"EXEC pedido.sp_actualizar_creditos_por_vendedor] @IdVendedor={IdVendedor}, @CreditoUtilizado = {CreditoUtilizado}").ToListAsync();
+            List<Creditos> data = await context.Credito.FromSqlInterpolated($"EXEC pedido.sp_actualizar_creditos_por_vendedor @IdVendedor={IdVendedor}, @CreditoUtilizado = {CreditoUtilizado}").ToListAsync();
 
             return StatusCode(200, new ItemResp { status = 200, message = status.CONFIRM, data = data });
 
