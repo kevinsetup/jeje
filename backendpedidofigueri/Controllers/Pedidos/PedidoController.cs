@@ -172,5 +172,20 @@ namespace backendpedidofigueri.Controllers.Pedidos
           });
 
         }
+    [HttpPost("SaveCkeckoutUpdatePedido")]
+    public async Task<ActionResult> SaveCkeckoutAndUpdatePedido(DetalleCheckout detalleCheckout)
+    {
+
+      var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_UPDATE_DETALLE_CHECKOUT] @direccion ={detalleCheckout.direccion},@tipoEntrega ={detalleCheckout.tipoEntrega},@tipoPago ={detalleCheckout.tipoPago},@idPedidoProducto ={detalleCheckout.idPedidoProducto}");
+
+
+      return StatusCode(200, new ItemResp
+      {
+        status = 200,
+        message = status.CONFIRM,
+        data = a
+      });
+
+    }
   }
 }

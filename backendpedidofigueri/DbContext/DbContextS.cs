@@ -41,8 +41,9 @@ public class DbContextS : DbContext
     public DbSet<DetallePedidoProducto> DetallePedidoProducto { get; set; }
     public DbSet<GetPedidos> GetPedidos { get; set; }
     public DbSet<GetDetallePedido> GetDetallePedido { get; set; }
+    public DbSet<DetalleCheckout> DetalleCheckout { get; set; }
 
-
+  
     //Administracion
 
 
