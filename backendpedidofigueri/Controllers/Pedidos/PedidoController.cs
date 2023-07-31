@@ -85,12 +85,27 @@ namespace backendpedidofigueri.Controllers.Pedidos
           var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
           savepedido.pedidoProducto.IdVendedor= IdVendedor;
           savepedido.pedidoProducto.IdCliente= IdCliente;
+
+            double total = 0;
           foreach (DetallePedidoProducto item in savepedido.listDetallePedidoProducto)
           {
               item.IdCliente = IdCliente;
-            
-          }
-          MapClassDatatable _map = new MapClassDatatable();
+                var returnValue = new SqlParameter("@precio", SqlDbType.Float)
+                {
+                    Direction = ParameterDirection.Output
+                };
+
+                await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_GET_PRICE_BY_PRODUCT] @idCliente={IdCliente}, @idProducto={item.IdProducto}, @precio={returnValue} Output");
+                var price = returnValue.Value;
+                item.Precio = (double?)price;
+                total = (double)(total + ((double?)price * item.Cantidad));
+
+            }
+            savepedido.pedidoProducto.MontoTotal = total;
+
+
+
+            MapClassDatatable _map = new MapClassDatatable();
           //Datatable
 
           DataTable dataTable = _map.MapClassToDataTable(savepedido.listDetallePedidoProducto);
