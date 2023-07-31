@@ -12,5 +12,6 @@ namespace backendpedidofigueri.Entity.Pedidos
         public string? NombreEmpresa { get; set; }
         public string? Apellidos { get; set; }
         public string? Nombres { get; set; }
+        public string? Nota { get; set;  }
     }
 }
