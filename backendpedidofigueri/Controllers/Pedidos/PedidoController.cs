@@ -35,6 +35,12 @@ namespace backendpedidofigueri.Controllers.Pedidos
           context = _context;
           configuration = _configuration;
         }
+        public class DatosCombinados
+        {
+            public DetalleCheckout DetalleCheckout { get; set; }
+            public SavePedido SavePedido { get; set; }
+        }
+
 
         [HttpGet("GetPedidosByDate")]
         public async Task<ActionResult> GetPedidosByDate(DateTime fechaInicio, DateTime fechaFin, bool hasPermission)
@@ -243,13 +249,17 @@ namespace backendpedidofigueri.Controllers.Pedidos
           });
 
         }
-    [HttpPost("SaveCkeckoutUpdatePedido")]
-    public async Task<ActionResult> SaveCkeckoutAndUpdatePedido(DetalleCheckout detalleCheckout,SavePedido savepedido)
-    {
+        [HttpPost("SaveCkeckoutUpdatePedido")]
+        public async Task<ActionResult> SaveCkeckoutAndUpdatePedido([FromBody] DatosCombinados datosCombinados)
+        {
             var IdCliente = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[3].Value;
             var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
+            var detalleCheckout = datosCombinados.DetalleCheckout;
+            var savepedido = datosCombinados.SavePedido;
             savepedido.pedidoProducto.IdVendedor = IdVendedor;
             savepedido.pedidoProducto.IdCliente = IdCliente;
+
+            // Rest of your existing code...
 
             double total = 0;
             foreach (DetallePedidoProducto item in savepedido.listDetallePedidoProducto)
@@ -264,16 +274,10 @@ namespace backendpedidofigueri.Controllers.Pedidos
                 var price = returnValue.Value;
                 item.Precio = (double?)price;
                 total = (double)(total + ((double?)price * item.Cantidad));
-
             }
             savepedido.pedidoProducto.MontoTotal = total;
-  
-
-
-
             MapClassDatatable _map = new MapClassDatatable();
             //Datatable
-
             DataTable dataTable = _map.MapClassToDataTable(savepedido.listDetallePedidoProducto);
             // Pasar el DataTable como parámetro al procedimiento almacenado
             var param = new SqlParameter
@@ -287,13 +291,12 @@ namespace backendpedidofigueri.Controllers.Pedidos
             var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_UPDATE_DETALLE_CHECKOUT] @direccion ={detalleCheckout.direccion},@tipoEntrega ={detalleCheckout.tipoEntrega},@tipoPago ={detalleCheckout.tipoPago},@idPedidoProducto ={detalleCheckout.idPedidoProducto}");
 
 
-      return StatusCode(200, new ItemResp
-      {
-        status = 200,
-        message = status.CONFIRM,
-        data = a
-      });
-
+            return StatusCode(200, new ItemResp
+            {
+                status = 200,
+                message = status.CONFIRM,
+                data = a
+            });
+        }
     }
-  }
 }
