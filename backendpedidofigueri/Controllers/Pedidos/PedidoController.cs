@@ -50,7 +50,7 @@ namespace backendpedidofigueri.Controllers.Pedidos
                 data = result
             });
         }
-        
+
 
         [HttpGet("GetPedidoById")]
         public async Task<ActionResult> GetPedidoById(int id, bool hasPermission)
@@ -187,6 +187,7 @@ namespace backendpedidofigueri.Controllers.Pedidos
                 Value = dataTable,
                 TypeName = "pedido.DetallePedidoProducto" // Reemplaza "TuTipoTabla" con el nombre correcto del tipo de tabla en la base de datos
             };
+            await context.Database.ExecuteSqlInterpolatedAsync($"Exec pedido.sp_actualizar_creditos_por_vendedor @idCliente = {IdCliente}, @IdVendedor = {IdVendedor}, @CreditoUtilizado = {montoTotal}");
             var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_INSERT_DETALLEPEDIDOPRODUCTO] @listaDetallePedidoProducto={param},@idCliente ={savepedido.pedidoProducto.IdCliente},@idTienda ={savepedido.pedidoProducto.IdTienda}, @FechaPedido ={savepedido.pedidoProducto.FechaPedido},@FechaEntrega ={savepedido.pedidoProducto.FechaEntrega}, @valor ={savepedido.pedidoProducto.Valor},@IGV = {savepedido.pedidoProducto.IGV},@MontoTotal = {montoTotal},@Descuento = {savepedido.pedidoProducto.Descuento},@Estado = {savepedido.pedidoProducto.Estado}, @IdTipoDoc ={savepedido.pedidoProducto.IdTipoDoc}, @TotalEnviado ={savepedido.pedidoProducto.TotalEnviado},@IdVendedor = {savepedido.pedidoProducto.IdVendedor}, @FechaRegistro ={savepedido.pedidoProducto.FechaRegistro}, @HoraRegistro ={savepedido.pedidoProducto.HoraRegistro}, @Nota ={savepedido.pedidoProducto.Nota}");
 
             return StatusCode(200, new ItemResp
@@ -243,43 +244,56 @@ namespace backendpedidofigueri.Controllers.Pedidos
 
         }
     [HttpPost("SaveCkeckoutUpdatePedido")]
-    public async Task<ActionResult> SaveCkeckoutAndUpdatePedido(DetalleCheckout detalleCheckout)
+    public async Task<ActionResult> SaveCkeckoutAndUpdatePedido(DetalleCheckout detalleCheckout,SavePedido savepedido)
     {
+            var IdCliente = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[3].Value;
+            var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
+            savepedido.pedidoProducto.IdVendedor = IdVendedor;
+            savepedido.pedidoProducto.IdCliente = IdCliente;
 
-      var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_UPDATE_DETALLE_CHECKOUT] @direccion ={detalleCheckout.direccion},@tipoEntrega ={detalleCheckout.tipoEntrega},@tipoPago ={detalleCheckout.tipoPago},@idPedidoProducto ={detalleCheckout.idPedidoProducto}");
+            double total = 0;
+            foreach (DetallePedidoProducto item in savepedido.listDetallePedidoProducto)
+            {
+                item.IdCliente = IdCliente;
+                var returnValue = new SqlParameter("@precio", SqlDbType.Float)
+                {
+                    Direction = ParameterDirection.Output
+                };
+
+                await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_GET_PRICE_BY_PRODUCT] @idCliente={IdCliente}, @idProducto={item.IdProducto}, @precio={returnValue} Output");
+                var price = returnValue.Value;
+                item.Precio = (double?)price;
+                total = (double)(total + ((double?)price * item.Cantidad));
+
+            }
+            savepedido.pedidoProducto.MontoTotal = total;
+  
+
+
+
+            MapClassDatatable _map = new MapClassDatatable();
+            //Datatable
+
+            DataTable dataTable = _map.MapClassToDataTable(savepedido.listDetallePedidoProducto);
+            // Pasar el DataTable como parámetro al procedimiento almacenado
+            var param = new SqlParameter
+            {
+                ParameterName = "@listaDetallePedidoProducto",
+                SqlDbType = SqlDbType.Structured,
+                Value = dataTable,
+                TypeName = "pedido.DetallePedidoProducto" // Reemplaza "TuTipoTabla" con el nombre correcto del tipo de tabla en la base de datos
+            };
+            await context.Database.ExecuteSqlInterpolatedAsync($"Exec pedido.sp_actualizar_creditos_por_vendedor @idCliente = {IdCliente}, @IdVendedor = {IdVendedor}, @CreditoUtilizado = {savepedido.pedidoProducto.MontoTotal}");
+            var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_UPDATE_DETALLE_CHECKOUT] @direccion ={detalleCheckout.direccion},@tipoEntrega ={detalleCheckout.tipoEntrega},@tipoPago ={detalleCheckout.tipoPago},@idPedidoProducto ={detalleCheckout.idPedidoProducto}");
+
+
       return StatusCode(200, new ItemResp
       {
         status = 200,
         message = status.CONFIRM,
         data = a
       });
-    }
-     [HttpGet("GetPedidosCanceladoByDate")]
-     public async Task<ActionResult> GetPedidosCanceladoByDate(DateTime fechaInicio, DateTime fechaFin, bool hasPermission)
-     {
-       var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
 
-       var result = await context.GetPedidos.FromSqlInterpolated($"Exec [pedido].[SP_LIST_PEDIDO_CANCELADO_BY_FECHA] @FechaInicio={fechaInicio}, @FechaFin={fechaFin},@IdVendedor={IdVendedor}, @PermisoVerMontoTotal={hasPermission} ").ToListAsync();
-
-       return StatusCode(200, new ItemResp
-       {
-         status = 200,
-         message = status.CREATE,
-         data = result
-       });
-     }
-    [HttpDelete("CancelarPedidoProducto")]
-    public async Task<ActionResult> CancelarPedidoProducto(int IdRegistroPedido)
-    {
-
-      var result = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_CANCELAR_PEDIDO] @idRegistroPedido={IdRegistroPedido} ");
-
-      return StatusCode(200, new ItemResp
-      {
-        status = 200,
-        message = status.CREATE,
-        data = result
-      });
     }
   }
 }
