@@ -1,6 +1,7 @@
 ﻿
 using Azure;
 using backendpedidofigueri.Entity.Credito;
+using backendpedidofigueri.Entity.DireccionEnvio;
 using backendpedidofigueri.Entity.Historial;
 using backendpedidofigueri.Entity.Login;
 using backendpedidofigueri.Entity.Pedidos;
@@ -42,6 +43,7 @@ public class DbContextS : DbContext
     public DbSet<GetPedidos> GetPedidos { get; set; }
     public DbSet<GetDetallePedido> GetDetallePedido { get; set; }
     public DbSet<DetalleCheckout> DetalleCheckout { get; set; }
+    public DbSet<DireccionEnvio> DireccionEnvio { get; set; }
 
   
     //Administracion
