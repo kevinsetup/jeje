@@ -13,6 +13,7 @@ namespace backendpedidofigueri.Entity.Historial
         public Double? ValorProducto { get; set; }
         public string? IdCliente { get; set; }
         public string? Imagen { get; set; }
+        public string? ultimos_pedidos { get; set; }
 
     }
 }

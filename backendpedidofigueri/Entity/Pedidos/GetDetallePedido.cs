@@ -11,5 +11,6 @@ namespace backendpedidofigueri.Entity.Pedidos
         public double? Precio { get; set; }
         public double? Cantidad { get; set; }
         public double? Resultado { get; set; }
+        public string? ultimos_pedidos { get; set; }
     }
 }
