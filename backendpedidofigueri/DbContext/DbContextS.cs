@@ -5,6 +5,7 @@ using backendpedidofigueri.Entity.DireccionEnvio;
 using backendpedidofigueri.Entity.Historial;
 using backendpedidofigueri.Entity.Login;
 using backendpedidofigueri.Entity.Pedidos;
+using backendpedidofigueri.Entity.Productos;
 using backendpedidofigueri.Entity.Rol.Funcion;
 using backendpedidofigueri.Entity.Rol.Permisos;
 using backendpedidofigueri.Entity.Rol.Responsable;
@@ -56,6 +57,9 @@ public class DbContextS : DbContext
 
     //Credito
     public DbSet<Creditos> Credito { get; set; }
+
+    //Producto
+    public DbSet<Producto> Producto { get; set; }
 
 
 
