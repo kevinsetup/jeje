@@ -112,75 +112,75 @@ namespace backendpedidofigueri.Controllers.Pedidos
             double creditoInicial = 0;
             double creditoUtilizado = 0;
             double creditoRestante = 0;
-            var creditoParams = new SqlParameter("@IdCliente", SqlDbType.Int)
-            {
-                Value = IdCliente
-            };
+            //var creditoParams = new SqlParameter("@IdCliente", SqlDbType.Int)
+            //{
+            //    Value = IdCliente
+            //};
 
-            var creditoQuery = await context.Credito
-                .FromSqlInterpolated($"EXEC pedido.sp_obtener_creditos_por_vendedor @IdCliente= {IdCliente}")
-                .ToListAsync();
+            //var creditoQuery = await context.Credito
+            //    .FromSqlInterpolated($"EXEC pedido.sp_obtener_creditos_por_vendedor @IdCliente= {IdCliente}")
+            //    .ToListAsync();
 
-            if (creditoQuery.Count == 0)
-            {
-                return StatusCode(404, new ItemResp
-                {
-                    status = 404,
-                    message = "No se encontró el crédito para el vendedor especificado.",
-                    data = null
-                });
-            }
-            var credito = creditoQuery[0];
+            //if (creditoQuery.Count == 0)
+            //{
+            //    return StatusCode(404, new ItemResp
+            //    {
+            //        status = 404,
+            //        message = "No se encontró el crédito para el vendedor especificado.",
+            //        data = null
+            //    });
+            //}
+            //var credito = creditoQuery[0];
 
-            if (!double.TryParse(credito.credito_inicial, out creditoInicial))
-            {
-                return StatusCode(500, new ItemResp
-                {
-                    status = 500,
-                    message = "Error al convertir el crédito inicial a valor numérico.",
-                    data = null
-                });
-            }
+            //if (!double.TryParse(credito.credito_inicial, out creditoInicial))
+            //{
+            //    return StatusCode(500, new ItemResp
+            //    {
+            //        status = 500,
+            //        message = "Error al convertir el crédito inicial a valor numérico.",
+            //        data = null
+            //    });
+            //}
 
-            if (!double.TryParse(credito.credito_utilizado, out creditoUtilizado))
-            {
-                return StatusCode(500, new ItemResp
-                {
-                    status = 500,
-                    message = "Error al convertir el crédito utilizado a valor numérico.",
-                    data = null
-                });
-            }
-            if (!double.TryParse(credito.restante, out creditoRestante))
-            {
-                return StatusCode(500, new ItemResp
-                {
-                    status = 500,
-                    message = "Error al convertir el crédito restante a valor numérico.",
-                    data = null
-                });
-            }
+            //if (!double.TryParse(credito.credito_utilizado, out creditoUtilizado))
+            //{
+            //    return StatusCode(500, new ItemResp
+            //    {
+            //        status = 500,
+            //        message = "Error al convertir el crédito utilizado a valor numérico.",
+            //        data = null
+            //    });
+            //}
+            //if (!double.TryParse(credito.restante, out creditoRestante))
+            //{
+            //    return StatusCode(500, new ItemResp
+            //    {
+            //        status = 500,
+            //        message = "Error al convertir el crédito restante a valor numérico.",
+            //        data = null
+            //    });
+            //}
             double montoTotal = savepedido.pedidoProducto.MontoTotal ?? 0.0; // Convertir MontoTotal a double
 
-            if (montoTotal > creditoInicial)
-            {
-                return StatusCode(400, new ItemResp
-                {
-                    status = 400,
-                    message = "El monto total excede el crédito inicial del vendedor.",
-                    data = null
-                });
-            }
+            //if (montoTotal > creditoInicial)
+            //{
+            //    return StatusCode(400, new ItemResp
+            //    {
+            //        status = 400,
+            //        message = "El monto total excede el crédito inicial del vendedor.",
+            //        data = null
+            //    });
+            //}
 
-            if (montoTotal > creditoRestante)
-            {
-                return StatusCode(400, new ItemResp
-                {
-                    status = 400,
-                    message = "El monto total excede el crédito restante del vendedor.",
-                    data = null
-                });
-            }
+            //if (montoTotal > creditoRestante)
+            //{
+            //    return StatusCode(400, new ItemResp
+            //    {
+            //        status = 400,
+            //        message = "El monto total excede el crédito restante del vendedor.",
+            //        data = null
+            //    });
+            //}
 
             MapClassDatatable _map = new MapClassDatatable();
             //Datatable
@@ -208,6 +208,73 @@ namespace backendpedidofigueri.Controllers.Pedidos
                 data = idValue.Value
             });
         }
+
+        [HttpPost("GetAvailability")]
+        public async Task<ActionResult> GetAvailability(SavePedido savepedido)
+        {
+            var IdCliente = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[3].Value;
+            var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
+            savepedido.pedidoProducto.IdVendedor = IdVendedor;
+            savepedido.pedidoProducto.IdCliente = IdCliente;
+
+            double total = 0;
+            foreach (DetallePedidoProducto item in savepedido.listDetallePedidoProducto)
+            {
+                item.IdCliente = IdCliente;
+                var returnValue = new SqlParameter("@precio", SqlDbType.Float)
+                {
+                    Direction = ParameterDirection.Output
+                };
+
+                await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_GET_PRICE_BY_PRODUCT] @idCliente={IdCliente}, @idProducto={item.IdProducto}, @precio={returnValue} Output");
+                var price = returnValue.Value;
+                item.Precio = (double?)price;
+                total = (double)(total + ((double?)price * item.Cantidad));
+            }
+            savepedido.pedidoProducto.MontoTotal = total;
+
+            var creditoQuery = await context.Credito
+                .FromSqlInterpolated($"EXEC pedido.sp_obtener_creditos_por_vendedor @IdCliente= {IdCliente}")
+                .ToListAsync();
+
+            if (creditoQuery.Count == 0)
+            {
+                return StatusCode(404, new ItemResp
+                {
+                    status = 404,
+                    message = "No se encontró el crédito para el vendedor especificado.",
+                    data = null
+                });
+            }
+            var credito = creditoQuery[0];
+
+            // Obtener los valores de crédito
+            double creditoInicial = double.Parse(credito.credito_inicial);
+            double creditoUtilizado = double.Parse(credito.credito_utilizado);
+            double creditoRestante = double.Parse(credito.restante);
+
+            double montoTotal = savepedido.pedidoProducto.MontoTotal ?? 0.0;
+
+            bool isAvailable = montoTotal <= creditoRestante && montoTotal <= creditoInicial;
+
+            // Construir objeto de respuesta
+            var response = new
+            {
+                MontoTotal = montoTotal,
+                CreditoInicial = creditoInicial,
+                CreditoUtilizado = creditoUtilizado,
+                CreditoRestante = creditoRestante,
+                IsAvailable = isAvailable
+            };
+
+            return StatusCode(200, new ItemResp
+            {
+                status = 200,
+                message = status.CONFIRM,
+                data = response
+            });
+        }
+
 
 
         [HttpPut("EditPedidoAndDetalleProducto")]
