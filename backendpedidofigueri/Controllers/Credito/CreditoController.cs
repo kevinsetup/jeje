@@ -61,7 +61,7 @@ namespace backendpedidofigueri.Controllers.Credito
             {
                 // Formatear el número decimal usando la cultura peruana (es-PE)
                 CultureInfo culture = new CultureInfo("es-PE");
-                string creditoInicialFormateado = creditoInicialDecimal.ToString("N2", culture); // "1.700.00"
+                string creditoInicialFormateado = creditoInicialDecimal.ToString("0.00", culture); // "1700.00"
 
                 // Pasar el valor formateado al procedimiento almacenado
                 await context.Database.ExecuteSqlInterpolatedAsync($@"

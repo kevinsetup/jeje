@@ -12,6 +12,7 @@ using System.Collections;
 using Microsoft.AspNetCore.Authorization;
 using backendpedidofigueri.Entity.Rol.Vendedor;
 using backendpedidofigueri.Entity.Credito;
+using Newtonsoft.Json.Linq;
 
 public class SavePedido
 {
@@ -193,14 +194,18 @@ namespace backendpedidofigueri.Controllers.Pedidos
                 Value = dataTable,
                 TypeName = "pedido.DetallePedidoProducto" // Reemplaza "TuTipoTabla" con el nombre correcto del tipo de tabla en la base de datos
             };
+            var idValue = new SqlParameter("@Id", SqlDbType.Int)
+            {
+                Direction = ParameterDirection.Output
+            };
             //await context.Database.ExecuteSqlInterpolatedAsync($"Exec pedido.sp_actualizar_creditos_por_vendedor @idCliente = {IdCliente}, @IdVendedor = {IdVendedor}, @CreditoUtilizado = {montoTotal}");
-            var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_INSERT_DETALLEPEDIDOPRODUCTO] @listaDetallePedidoProducto={param},@idCliente ={savepedido.pedidoProducto.IdCliente},@idTienda ={savepedido.pedidoProducto.IdTienda}, @FechaPedido ={savepedido.pedidoProducto.FechaPedido},@FechaEntrega ={savepedido.pedidoProducto.FechaEntrega}, @valor ={savepedido.pedidoProducto.Valor},@IGV = {savepedido.pedidoProducto.IGV},@MontoTotal = {montoTotal},@Descuento = {savepedido.pedidoProducto.Descuento},@Estado = {savepedido.pedidoProducto.Estado}, @IdTipoDoc ={savepedido.pedidoProducto.IdTipoDoc}, @TotalEnviado ={savepedido.pedidoProducto.TotalEnviado},@IdVendedor = {savepedido.pedidoProducto.IdVendedor}, @FechaRegistro ={savepedido.pedidoProducto.FechaRegistro}, @HoraRegistro ={savepedido.pedidoProducto.HoraRegistro}, @Nota ={savepedido.pedidoProducto.Nota}");
+            var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_INSERT_DETALLEPEDIDOPRODUCTO] @listaDetallePedidoProducto={param},@idCliente ={savepedido.pedidoProducto.IdCliente},@idTienda ={savepedido.pedidoProducto.IdTienda}, @FechaPedido ={savepedido.pedidoProducto.FechaPedido},@FechaEntrega ={savepedido.pedidoProducto.FechaEntrega}, @valor ={savepedido.pedidoProducto.Valor},@IGV = {savepedido.pedidoProducto.IGV},@MontoTotal = {montoTotal},@Descuento = {savepedido.pedidoProducto.Descuento},@Estado = {savepedido.pedidoProducto.Estado}, @IdTipoDoc ={savepedido.pedidoProducto.IdTipoDoc}, @TotalEnviado ={savepedido.pedidoProducto.TotalEnviado},@IdVendedor = {savepedido.pedidoProducto.IdVendedor}, @FechaRegistro ={savepedido.pedidoProducto.FechaRegistro}, @HoraRegistro ={savepedido.pedidoProducto.HoraRegistro}, @Nota ={savepedido.pedidoProducto.Nota},  @Id={idValue} Output");
 
             return StatusCode(200, new ItemResp
             {
                 status = 200,
                 message = status.CONFIRM,
-                data = a
+                data = idValue.Value
             });
         }
 
@@ -303,7 +308,7 @@ namespace backendpedidofigueri.Controllers.Pedidos
         {
             var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
 
-            var result = await context.GetPedidos.FromSqlInterpolated($"Exec [pedido].[SP_LIST_PEDIDO_CANCELADO_BY_FECHA] @FechaInicio={fechaInicio}, @FechaFin={fechaFin},@IdVendedor={IdVendedor}, @PermisoVerMontoTotal={hasPermission} ").ToListAsync();
+            var result = await context.GetPedidosCancelados.FromSqlInterpolated($"Exec [pedido].[SP_LIST_PEDIDO_CANCELADO_BY_FECHA] @FechaInicio={fechaInicio}, @FechaFin={fechaFin},@IdVendedor={IdVendedor}, @PermisoVerMontoTotal={hasPermission} ").ToListAsync();
 
             return StatusCode(200, new ItemResp
             {
@@ -313,8 +318,9 @@ namespace backendpedidofigueri.Controllers.Pedidos
             });
         }
         [HttpDelete("CancelarPedidoProducto")]
-        public async Task<ActionResult> CancelarPedidoProducto(int IdRegistroPedido)
+        public async Task<ActionResult> CancelarPedidoProducto(int IdRegistroPedido, string justificacion )
         {
+            await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_INSERT_DETALLE_CANCELADO] @justificacion = {justificacion}, @idRegistroPedido = {IdRegistroPedido}");
 
             var result = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_CANCELAR_PEDIDO] @idRegistroPedido={IdRegistroPedido} ");
 

@@ -16,7 +16,6 @@ namespace backendpedidofigueri.Entity.Credito
         public DateTime? FechaInsercion { get; set; }
         //public long? RowNum { get; set; }
         public string? Nombres { get; set; }
-        public string? Apellidos { get; set; }
 
 
 
