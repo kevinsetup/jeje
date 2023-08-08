@@ -12,6 +12,7 @@ using System.Collections;
 using Microsoft.AspNetCore.Authorization;
 using backendpedidofigueri.Entity.Rol.Vendedor;
 using backendpedidofigueri.Entity.Credito;
+using Newtonsoft.Json.Linq;
 
 public class SavePedido
 {
@@ -131,7 +132,7 @@ namespace backendpedidofigueri.Controllers.Pedidos
             }
             var credito = creditoQuery[0];
 
-            if (!double.TryParse(credito.credito_incial, out creditoInicial))
+            if (!double.TryParse(credito.credito_inicial, out creditoInicial))
             {
                 return StatusCode(500, new ItemResp
                 {
@@ -193,16 +194,13 @@ namespace backendpedidofigueri.Controllers.Pedidos
                 Value = dataTable,
                 TypeName = "pedido.DetallePedidoProducto" // Reemplaza "TuTipoTabla" con el nombre correcto del tipo de tabla en la base de datos
             };
-
-
             var idValue = new SqlParameter("@Id", SqlDbType.Int)
             {
                 Direction = ParameterDirection.Output
             };
+            //await context.Database.ExecuteSqlInterpolatedAsync($"Exec pedido.sp_actualizar_creditos_por_vendedor @idCliente = {IdCliente}, @IdVendedor = {IdVendedor}, @CreditoUtilizado = {montoTotal}");
+            var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_INSERT_DETALLEPEDIDOPRODUCTO] @listaDetallePedidoProducto={param},@idCliente ={savepedido.pedidoProducto.IdCliente},@idTienda ={savepedido.pedidoProducto.IdTienda}, @FechaPedido ={savepedido.pedidoProducto.FechaPedido},@FechaEntrega ={savepedido.pedidoProducto.FechaEntrega}, @valor ={savepedido.pedidoProducto.Valor},@IGV = {savepedido.pedidoProducto.IGV},@MontoTotal = {montoTotal},@Descuento = {savepedido.pedidoProducto.Descuento},@Estado = {savepedido.pedidoProducto.Estado}, @IdTipoDoc ={savepedido.pedidoProducto.IdTipoDoc}, @TotalEnviado ={savepedido.pedidoProducto.TotalEnviado},@IdVendedor = {savepedido.pedidoProducto.IdVendedor}, @FechaRegistro ={savepedido.pedidoProducto.FechaRegistro}, @HoraRegistro ={savepedido.pedidoProducto.HoraRegistro}, @Nota ={savepedido.pedidoProducto.Nota},  @Id={idValue} Output");
 
-            await context.Database.ExecuteSqlInterpolatedAsync($"Exec pedido.sp_actualizar_creditos_por_vendedor @idCliente = {IdCliente}, @IdVendedor = {IdVendedor}, @CreditoUtilizado = {montoTotal}");
-            var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_INSERT_DETALLEPEDIDOPRODUCTO] @listaDetallePedidoProducto={param},@idCliente ={savepedido.pedidoProducto.IdCliente},@idTienda ={savepedido.pedidoProducto.IdTienda}, @FechaPedido ={savepedido.pedidoProducto.FechaPedido},@FechaEntrega ={savepedido.pedidoProducto.FechaEntrega}, @valor ={savepedido.pedidoProducto.Valor},@IGV = {savepedido.pedidoProducto.IGV},@MontoTotal = {montoTotal},@Descuento = {savepedido.pedidoProducto.Descuento},@Estado = {savepedido.pedidoProducto.Estado}, @IdTipoDoc ={savepedido.pedidoProducto.IdTipoDoc}, @TotalEnviado ={savepedido.pedidoProducto.TotalEnviado},@IdVendedor = {savepedido.pedidoProducto.IdVendedor}, @FechaRegistro ={savepedido.pedidoProducto.FechaRegistro}, @HoraRegistro ={savepedido.pedidoProducto.HoraRegistro}, @Nota ={savepedido.pedidoProducto.Nota}, @Id={idValue} Output ");
-         
             return StatusCode(200, new ItemResp
             {
                 status = 200,
