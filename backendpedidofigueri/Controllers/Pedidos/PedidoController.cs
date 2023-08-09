@@ -233,8 +233,8 @@ namespace backendpedidofigueri.Controllers.Pedidos
             }
             savepedido.pedidoProducto.MontoTotal = total;
 
-            var creditoQuery = await context.Credito
-                .FromSqlInterpolated($"EXEC pedido.sp_obtener_creditos_por_vendedor @IdCliente= {IdCliente}")
+            var creditoQuery = await context.CajaCliente
+                .FromSqlInterpolated($"EXEC pedido.sp_obtener_creditos_por_cliente @IdCliente= {IdCliente}")
                 .ToListAsync();
 
             if (creditoQuery.Count == 0)
@@ -249,13 +249,12 @@ namespace backendpedidofigueri.Controllers.Pedidos
             var credito = creditoQuery[0];
 
             // Obtener los valores de crédito
-            double creditoInicial = double.Parse(credito.credito_inicial);
-            double creditoUtilizado = double.Parse(credito.credito_utilizado);
-            double creditoRestante = double.Parse(credito.restante);
+            var creditoInicial = credito.Credito;
+            var creditoUtilizado = credito.CreditoUtilizado;
+            var creditoRestante = credito.CreditoRestante;
+            double montoTotal = savepedido.pedidoProducto.MontoTotal.HasValue ? savepedido.pedidoProducto.MontoTotal.Value : 0.0;
 
-            double montoTotal = savepedido.pedidoProducto.MontoTotal ?? 0.0;
-
-            bool isAvailable = montoTotal <= creditoRestante && montoTotal <= creditoInicial;
+            bool isAvailable = (decimal)montoTotal <= (decimal)creditoRestante && (decimal)montoTotal <= (decimal)creditoInicial;
 
             // Construir objeto de respuesta
             var response = new

@@ -58,6 +58,7 @@ public class DbContextS : DbContext
     public DbSet<Creditos> Credito { get; set; }
     public DbSet<Cliente> Cliente{ get; set; }
 
+    public DbSet<CajaCliente> CajaCliente{ get; set; }
 
 
 
