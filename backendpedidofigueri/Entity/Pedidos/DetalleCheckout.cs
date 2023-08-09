@@ -6,7 +6,7 @@ namespace backendpedidofigueri.Entity.Pedidos
     {
      
       //Set
-      public string? direccion { get; set; }
+      public int? IdDireccionEnvio { get; set; }
       public string? tipoEntrega { get; set; }
       public string? tipoPago { get; set; }
       public int? idPedidoProducto { get; set; }
