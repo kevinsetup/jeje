@@ -360,7 +360,7 @@ namespace backendpedidofigueri.Controllers.Pedidos
                 TypeName = "pedido.DetallePedidoProducto" // Reemplaza "TuTipoTabla" con el nombre correcto del tipo de tabla en la base de datos
             };
             await context.Database.ExecuteSqlInterpolatedAsync($"Exec pedido.sp_actualizar_creditos_por_vendedor @idCliente = {IdCliente}, @IdVendedor = {IdVendedor}, @CreditoUtilizado = {savepedido.pedidoProducto.MontoTotal}");
-            var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_UPDATE_DETALLE_CHECKOUT] @direccion ={detalleCheckout.direccion},@tipoEntrega ={detalleCheckout.tipoEntrega},@tipoPago ={detalleCheckout.tipoPago},@idPedidoProducto ={detalleCheckout.idPedidoProducto}");
+            var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_UPDATE_DETALLE_CHECKOUT] @direccion ={detalleCheckout.IdDireccionEnvio},@tipoEntrega ={detalleCheckout.tipoEntrega},@tipoPago ={detalleCheckout.tipoPago},@idPedidoProducto ={detalleCheckout.idPedidoProducto}");
 
 
             return StatusCode(200, new ItemResp
@@ -370,6 +370,22 @@ namespace backendpedidofigueri.Controllers.Pedidos
                 data = a
             });
         }
+
+        [HttpPost("SaveCheckoutPedidoContado")]
+        public async Task<ActionResult> SaveCheckoutPedidoContado( DetalleCheckout detalleCheckout)
+        {
+          
+            var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_UPDATE_DETALLE_CHECKOUT] @direccion ={detalleCheckout.IdDireccionEnvio},@tipoEntrega ={detalleCheckout.tipoEntrega},@tipoPago ={detalleCheckout.tipoPago},@idPedidoProducto ={detalleCheckout.idPedidoProducto}");
+
+
+            return StatusCode(200, new ItemResp
+            {
+                status = 200,
+                message = status.CONFIRM,
+                data = a
+            });
+        }
+
         [HttpGet("GetPedidosCanceladoByDate")]
         public async Task<ActionResult> GetPedidosCanceladoByDate(DateTime fechaInicio, DateTime fechaFin, bool hasPermission)
         {
