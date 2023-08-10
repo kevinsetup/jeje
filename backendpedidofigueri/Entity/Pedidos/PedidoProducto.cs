@@ -19,5 +19,7 @@
       public DateTime? FechaRegistro { get; set; }
       public DateTime? HoraRegistro { get; set; }
       public string? Nota { get; set; }
+      public string IP { get; set; }
+
   }
 }
