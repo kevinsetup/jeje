@@ -358,6 +358,17 @@ namespace backendpedidofigueri.Controllers.Pedidos
                 Value = dataTable,
                 TypeName = "pedido.DetallePedidoProducto" // Reemplaza "TuTipoTabla" con el nombre correcto del tipo de tabla en la base de datos
             };
+
+            var idPedidoProducto = new SqlParameter("@Id", SqlDbType.VarChar, 12)
+            {
+                Direction = ParameterDirection.Output
+            };
+
+
+            await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_DESCARGAR_PEDIDO] @IdRegistroPedido ={detalleCheckout.idPedidoProducto} ,@IdResponsable={"0001"} , @Id={idPedidoProducto} Output ");
+
+            //Console.WriteLine(idPedidoProducto.Value);
+
             await context.Database.ExecuteSqlInterpolatedAsync($"Exec pedido.sp_actualizar_creditos_por_vendedor @idCliente = {IdCliente}, @IdVendedor = {IdVendedor}, @CreditoUtilizado = {savepedido.pedidoProducto.MontoTotal}, @IP = {savepedido.pedidoProducto.IP}");
             var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_UPDATE_DETALLE_CHECKOUT] @direccion ={detalleCheckout.IdDireccionEnvio},@tipoEntrega ={detalleCheckout.tipoEntrega},@tipoPago ={detalleCheckout.tipoPago},@idPedidoProducto ={detalleCheckout.idPedidoProducto}");
 
@@ -373,6 +384,13 @@ namespace backendpedidofigueri.Controllers.Pedidos
         [HttpPost("SaveCheckoutPedidoContado")]
         public async Task<ActionResult> SaveCheckoutPedidoContado( DetalleCheckout detalleCheckout)
         {
+
+            var idPedidoProducto = new SqlParameter("@Id", SqlDbType.VarChar, 12)
+            {
+                Direction = ParameterDirection.Output
+            };
+
+            await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_DESCARGAR_PEDIDO] @IdRegistroPedido ={detalleCheckout.idPedidoProducto} ,@IdResponsable={"0001"}, @Id={idPedidoProducto} Output ");
           
             var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_UPDATE_DETALLE_CHECKOUT] @direccion ={detalleCheckout.IdDireccionEnvio},@tipoEntrega ={detalleCheckout.tipoEntrega},@tipoPago ={detalleCheckout.tipoPago},@idPedidoProducto ={detalleCheckout.idPedidoProducto}");
 
