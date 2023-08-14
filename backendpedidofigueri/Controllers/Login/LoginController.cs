@@ -212,7 +212,16 @@ namespace backendpedidofigueri.Controllers.Login
             var list = roots.Select(x => ProcessNode(navigation, x)).ToList();
             var rootsDistinct = roots.DistinctBy(c => c.IdModulo);
 
-            var groupby = rootsDistinct.Select(c => new { id = c.NomModulo, title = c.NomModulo, type = "collapse", icon = (c.Icon == null) ? null : c.Icon.Trim(), link = ' ', children = list.Where(x => x.idModulo == c.IdModulo.ToString()) });
+            var groupby = rootsDistinct.Select(c => new
+            {
+                id = c.IdModulo == null ? c.NomFuncion : c.NomModulo,
+                title = c.IdModulo == null ? c.NomFuncion : c.NomModulo,
+                type = c.IdModulo == null ? "item" : "collapse", // Cambio aquí
+                icon = (c.Icon == null) ? null : c.Icon.Trim(),
+                link ="",
+                url  = c.IdModulo == null ? c.Ruta : "",
+                children = c.IdModulo == null ? null : list.Where(x => x.idModulo == c.IdModulo.ToString()) // Cambio aquí
+            });
 
             User user = await structuredUser(IdUsuario);
 
@@ -248,6 +257,7 @@ namespace backendpedidofigueri.Controllers.Login
             {
                 result = new NavigationNode { id = node.IdModulo.ToString(), idModulo = node.IdFuncion.ToString(), title = node.NomFuncion, type = "collapse", icon = (node.Icon == null) ? null : node.Icon.Trim(), url = node.Ruta == null ? node.Ruta : node.Ruta.Trim(), children = children };
             }
+           
             return result;
         }
         private async Task<User> structuredUser(string IdUsuario)

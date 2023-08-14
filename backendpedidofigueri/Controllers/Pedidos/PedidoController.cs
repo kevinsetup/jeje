@@ -323,84 +323,98 @@ namespace backendpedidofigueri.Controllers.Pedidos
         [HttpPost("SaveCkeckoutUpdatePedido")]
         public async Task<ActionResult> SaveCkeckoutAndUpdatePedido([FromBody] DatosCombinados datosCombinados)
         {
-            var IdCliente = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[3].Value;
-            var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
-            var detalleCheckout = datosCombinados.DetalleCheckout;
-            var savepedido = datosCombinados.SavePedido;
-            savepedido.pedidoProducto.IdVendedor = IdVendedor;
-            savepedido.pedidoProducto.IdCliente = IdCliente;
-
-            // Rest of your existing code...
-
-            double total = 0;
-            foreach (DetallePedidoProducto item in savepedido.listDetallePedidoProducto)
+            try
             {
-                item.IdCliente = IdCliente;
-                var returnValue = new SqlParameter("@precio", SqlDbType.Float)
+                var IdCliente = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[3].Value;
+                var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
+                var detalleCheckout = datosCombinados.DetalleCheckout;
+                var savepedido = datosCombinados.SavePedido;
+                savepedido.pedidoProducto.IdVendedor = IdVendedor;
+                savepedido.pedidoProducto.IdCliente = IdCliente;
+
+                // Rest of your existing code...
+
+                double total = 0;
+                foreach (DetallePedidoProducto item in savepedido.listDetallePedidoProducto)
+                {
+                    item.IdCliente = IdCliente;
+                    var returnValue = new SqlParameter("@precio", SqlDbType.Float)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+
+                    await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_GET_PRICE_BY_PRODUCT] @idCliente={IdCliente}, @idProducto={item.IdProducto}, @precio={returnValue} Output");
+                    var price = returnValue.Value;
+                    item.Precio = (double?)price;
+                    total = (double)(total + ((double?)price * item.Cantidad));
+                }
+                savepedido.pedidoProducto.MontoTotal = total;
+                MapClassDatatable _map = new MapClassDatatable();
+                //Datatable
+                DataTable dataTable = _map.MapClassToDataTable(savepedido.listDetallePedidoProducto);
+                // Pasar el DataTable como parámetro al procedimiento almacenado
+                var param = new SqlParameter
+                {
+                    ParameterName = "@listaDetallePedidoProducto",
+                    SqlDbType = SqlDbType.Structured,
+                    Value = dataTable,
+                    TypeName = "pedido.DetallePedidoProducto" // Reemplaza "TuTipoTabla" con el nombre correcto del tipo de tabla en la base de datos
+                };
+
+                var idPedidoProducto = new SqlParameter("@Id", SqlDbType.VarChar, 12)
                 {
                     Direction = ParameterDirection.Output
                 };
 
-                await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_GET_PRICE_BY_PRODUCT] @idCliente={IdCliente}, @idProducto={item.IdProducto}, @precio={returnValue} Output");
-                var price = returnValue.Value;
-                item.Precio = (double?)price;
-                total = (double)(total + ((double?)price * item.Cantidad));
+
+                await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_DESCARGAR_PEDIDO] @IdRegistroPedido ={detalleCheckout.idPedidoProducto} ,@IdResponsable={"0001"} , @Id={idPedidoProducto} Output ");
+
+                //Console.WriteLine(idPedidoProducto.Value);
+
+                await context.Database.ExecuteSqlInterpolatedAsync($"Exec pedido.sp_actualizar_creditos_por_vendedor @idCliente = {IdCliente}, @IdVendedor = {IdVendedor}, @CreditoUtilizado = {savepedido.pedidoProducto.MontoTotal}, @IP = {savepedido.pedidoProducto.IP}");
+                var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_UPDATE_DETALLE_CHECKOUT] @direccion ={detalleCheckout.IdDireccionEnvio},@tipoEntrega ={detalleCheckout.tipoEntrega},@tipoPago ={detalleCheckout.tipoPago},@idPedidoProducto ={detalleCheckout.idPedidoProducto}");
+
+
+                return StatusCode(200, new ItemResp
+                {
+                    status = 200,
+                    message = status.CONFIRM,
+                    data = a
+                });
             }
-            savepedido.pedidoProducto.MontoTotal = total;
-            MapClassDatatable _map = new MapClassDatatable();
-            //Datatable
-            DataTable dataTable = _map.MapClassToDataTable(savepedido.listDetallePedidoProducto);
-            // Pasar el DataTable como parámetro al procedimiento almacenado
-            var param = new SqlParameter
+            catch (InvalidCastException e)
             {
-                ParameterName = "@listaDetallePedidoProducto",
-                SqlDbType = SqlDbType.Structured,
-                Value = dataTable,
-                TypeName = "pedido.DetallePedidoProducto" // Reemplaza "TuTipoTabla" con el nombre correcto del tipo de tabla en la base de datos
-            };
-
-            var idPedidoProducto = new SqlParameter("@Id", SqlDbType.VarChar, 12)
-            {
-                Direction = ParameterDirection.Output
-            };
-
-
-            await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_DESCARGAR_PEDIDO] @IdRegistroPedido ={detalleCheckout.idPedidoProducto} ,@IdResponsable={"0001"} , @Id={idPedidoProducto} Output ");
-
-            //Console.WriteLine(idPedidoProducto.Value);
-
-            await context.Database.ExecuteSqlInterpolatedAsync($"Exec pedido.sp_actualizar_creditos_por_vendedor @idCliente = {IdCliente}, @IdVendedor = {IdVendedor}, @CreditoUtilizado = {savepedido.pedidoProducto.MontoTotal}, @IP = {savepedido.pedidoProducto.IP}");
-            var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_UPDATE_DETALLE_CHECKOUT] @direccion ={detalleCheckout.IdDireccionEnvio},@tipoEntrega ={detalleCheckout.tipoEntrega},@tipoPago ={detalleCheckout.tipoPago},@idPedidoProducto ={detalleCheckout.idPedidoProducto}");
-
-
-            return StatusCode(200, new ItemResp
-            {
-                status = 200,
-                message = status.CONFIRM,
-                data = a
-            });
+                return StatusCode(404, new ItemResp { status = 200, message = status.ERROR, data = e.ToString() });
+            }
         }
 
         [HttpPost("SaveCheckoutPedidoContado")]
         public async Task<ActionResult> SaveCheckoutPedidoContado( DetalleCheckout detalleCheckout)
         {
 
-            var idPedidoProducto = new SqlParameter("@Id", SqlDbType.VarChar, 12)
+            try
             {
-                Direction = ParameterDirection.Output
-            };
+                var idPedidoProducto = new SqlParameter("@Id", SqlDbType.VarChar, 12)
+                {
+                    Direction = ParameterDirection.Output
+                };
 
-            await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_DESCARGAR_PEDIDO] @IdRegistroPedido ={detalleCheckout.idPedidoProducto} ,@IdResponsable={"0001"}, @Id={idPedidoProducto} Output ");
-          
-            var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_UPDATE_DETALLE_CHECKOUT] @direccion ={detalleCheckout.IdDireccionEnvio},@tipoEntrega ={detalleCheckout.tipoEntrega},@tipoPago ={detalleCheckout.tipoPago},@idPedidoProducto ={detalleCheckout.idPedidoProducto}");
+                await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_DESCARGAR_PEDIDO] @IdRegistroPedido ={detalleCheckout.idPedidoProducto} ,@IdResponsable={"0001"}, @Id={idPedidoProducto} Output ");
+
+                var a = await context.Database.ExecuteSqlInterpolatedAsync($"Exec [pedido].[SP_UPDATE_DETALLE_CHECKOUT] @direccion ={detalleCheckout.IdDireccionEnvio},@tipoEntrega ={detalleCheckout.tipoEntrega},@tipoPago ={detalleCheckout.tipoPago},@idPedidoProducto ={detalleCheckout.idPedidoProducto}");
 
 
-            return StatusCode(200, new ItemResp
+                return StatusCode(200, new ItemResp
+                {
+                    status = 200,
+                    message = status.CONFIRM,
+                    data = a
+                });
+            }
+            catch (InvalidCastException e)
             {
-                status = 200,
-                message = status.CONFIRM,
-                data = a
-            });
+                return StatusCode(404, new ItemResp { status = 200, message = status.ERROR, data = e.ToString() });
+            }
         }
 
         [HttpGet("GetPedidosCanceladoByDate")]
@@ -453,6 +467,21 @@ namespace backendpedidofigueri.Controllers.Pedidos
             var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
 
             var result = await context.GetPedidos.FromSqlInterpolated($"Exec [pedido].[SP_LIST_PEDIDO_ENVIADO_BY_FECHA] @FechaInicio={fechaInicio}, @FechaFin={fechaFin},@IdVendedor={IdVendedor}, @PermisoVerMonto={hasPermission} ").ToListAsync();
+
+            return StatusCode(200, new ItemResp
+            {
+                status = 200,
+                message = status.CREATE,
+                data = result
+            });
+        }
+
+        [HttpGet("GetMisCompras")]
+        public async Task<ActionResult> GetMisCompras(DateTime fechaInicio, DateTime fechaFin, bool hasPermission)
+        {
+            var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
+
+            var result = await context.GetPedidos.FromSqlInterpolated($"Exec [pedido].[SP_LIST_MIS_COMPRAS] @FechaInicio={fechaInicio}, @FechaFin={fechaFin},@IdVendedor={IdVendedor}, @PermisoVerMonto={hasPermission} ").ToListAsync();
 
             return StatusCode(200, new ItemResp
             {
