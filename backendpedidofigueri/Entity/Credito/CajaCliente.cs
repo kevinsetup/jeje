@@ -25,5 +25,18 @@ namespace backendpedidofigueri.Entity.Credito
         public string? Queja { get; set; }
 
 
+        public int? Diascredito { get; set; }
+        public int? NroDiasPedido { get; set; }
+
+
+    }
+
+    public class DiasInfoDto
+    {
+        [Key]
+        public string? IdCliente { get; set; }
+
+        public int? Diascredito { get; set; }
+        public int? NroDiasPedido { get; set; }
     }
 }

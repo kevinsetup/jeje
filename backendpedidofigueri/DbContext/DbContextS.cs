@@ -62,6 +62,8 @@ public class DbContextS : DbContext
 
     public DbSet<CajaCliente> CajaCliente{ get; set; }
 
+    public DbSet<DiasInfoDto> DiasInfoDto { get; set; }
+
     public DbSet<Producto> Producto { get; set; }
 
 

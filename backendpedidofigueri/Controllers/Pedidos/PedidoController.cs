@@ -490,5 +490,22 @@ namespace backendpedidofigueri.Controllers.Pedidos
                 data = result
             });
         }
+
+        [HttpGet("GetDCreditoNdiasPedido")]
+        public async Task<ActionResult> GetDCreditoNdiasPedido()
+        {
+            var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
+            var IdCliente = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[3].Value;
+
+            var result = await context.DiasInfoDto.FromSqlInterpolated($"exec sp_ObtenerDiasCreditoYDiasPedido {IdCliente} ").ToListAsync();
+
+            return StatusCode(200, new ItemResp
+            {
+                status = 200,
+                message = status.CREATE,
+                data = result
+            });
+        }
+
     }
 }
