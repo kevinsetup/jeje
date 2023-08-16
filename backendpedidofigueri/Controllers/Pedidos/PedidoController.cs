@@ -451,7 +451,7 @@ namespace backendpedidofigueri.Controllers.Pedidos
         {
             var IdVendedor = ((ClaimsIdentity)User.Identity).FindAll(ClaimTypes.NameIdentifier).ToList()[4].Value;
 
-            var result = await context.GetPedidos.FromSqlInterpolated($"Exec [pedido].[SP_LIST_PEDIDO_CONFIRMADO_BY_FECHA] @FechaInicio={fechaInicio}, @FechaFin={fechaFin},@IdVendedor={IdVendedor}, @PermisoVerMonto={hasPermission} ").ToListAsync();
+            var result = await context.GetPedidosConfirmados.FromSqlInterpolated($"Exec [pedido].[SP_LIST_PEDIDO_CONFIRMADO_BY_FECHA] @FechaInicio={fechaInicio}, @FechaFin={fechaFin},@IdVendedor={IdVendedor}, @PermisoVerMonto={hasPermission} ").ToListAsync();
 
             return StatusCode(200, new ItemResp
             {
