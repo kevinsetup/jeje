@@ -14,5 +14,7 @@ namespace backendpedidofigueri.Entity.Pedidos
         public string? Nombres { get; set; }
         public string? Nota { get; set;  }
         public string? TipoPago { get; set; }
+        public string? IdPedidoProducto { get; set; }
+        public string? DescripcionEstadoPago { get; set; }
     }
 }

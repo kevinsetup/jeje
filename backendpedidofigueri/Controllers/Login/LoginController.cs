@@ -22,6 +22,8 @@ using System.Text;
 using System.Xml.Linq;
 using backendpedidofigueri.Utilities;
 using Microsoft.Data.SqlClient;
+using System.Linq;
+using Microsoft.OpenApi.Any;
 
 namespace backendpedidofigueri.Controllers.Login
 {
@@ -80,6 +82,17 @@ namespace backendpedidofigueri.Controllers.Login
         public string? icon { get; set; }
         public string? url { get; set; }
         public List<NavigationNode> children { get; set; }
+    }
+
+    public class CombinedObject
+    {
+        public string id { get; set; }
+        public string title { get; set; }
+        public string type { get; set; }
+        public string icon { get; set; }
+        public string link { get; set; }
+        public string url { get; set; }
+        public IEnumerable<NavigationNode> children { get; set; }
     }
 
     [Route("api/[controller]")]
@@ -212,16 +225,31 @@ namespace backendpedidofigueri.Controllers.Login
             var list = roots.Select(x => ProcessNode(navigation, x)).ToList();
             var rootsDistinct = roots.DistinctBy(c => c.IdModulo);
 
-            var groupby = rootsDistinct.Select(c => new
+            var rootsNotNull = rootsDistinct.Where(x => x.IdModulo != null);
+            var rootsNull = roots.Where(x => x.IdModulo == null);
+
+
+            var combinedData = rootsNull.Select(c => new CombinedObject
             {
-                id = c.IdModulo == null ? c.NomFuncion : c.NomModulo,
-                title = c.IdModulo == null ? c.NomFuncion : c.NomModulo,
-                type = c.IdModulo == null ? "item" : "collapse", // Cambio aquí
+                id = c.NomFuncion,
+                title = c.NomFuncion,
+                type = "item",
                 icon = (c.Icon == null) ? null : c.Icon.Trim(),
-                link ="",
-                url  = c.IdModulo == null ? c.Ruta : "",
-                children = c.IdModulo == null ? null : list.Where(x => x.idModulo == c.IdModulo.ToString()) // Cambio aquí
-            });
+                link = "",
+                url = c.Ruta,
+                children = new List<NavigationNode>(), // O una lista vacía, ya que no hay children en rootsNull
+            })
+             .Concat(rootsNotNull.Select(c => new CombinedObject
+             {
+                 id = c.NomModulo,
+                 title = c.NomModulo,
+                 type = "collapse",
+                 icon = (c.Icon == null) ? null : c.Icon.Trim(),
+                 link = "",
+                 url = "",
+                 children = list.Where(x => x.idModulo == c.IdModulo.ToString()).ToList(),
+             })
+            );
 
             User user = await structuredUser(IdUsuario);
 
@@ -231,7 +259,7 @@ namespace backendpedidofigueri.Controllers.Login
                 Message = status.CONFIRM,
                 User = user,
                 access_token = bearerToken,
-                Navigation = groupby  // Incluimos groupby en la respuesta
+                Navigation = combinedData // Incluimos groupby en la respuesta
 
             });
         }
@@ -247,7 +275,7 @@ namespace backendpedidofigueri.Controllers.Login
             result = new NavigationNode
             {
                 id = node.IdFuncion.ToString(),//IdFuncion
-                idModulo=node.IdModulo.ToString(),
+                idModulo = node.IdModulo.ToString(),
                 title = node.NomFuncion,
                 type = "item",
                 icon = (node.Icon == null) ? null : node.Icon.Trim(),
@@ -257,35 +285,35 @@ namespace backendpedidofigueri.Controllers.Login
             {
                 result = new NavigationNode { id = node.IdModulo.ToString(), idModulo = node.IdFuncion.ToString(), title = node.NomFuncion, type = "collapse", icon = (node.Icon == null) ? null : node.Icon.Trim(), url = node.Ruta == null ? node.Ruta : node.Ruta.Trim(), children = children };
             }
-           
+
             return result;
         }
         private async Task<User> structuredUser(string IdUsuario)
         {
-              IEnumerable<InfoUser> infoUserList = (IEnumerable<InfoUser>) await context.InfoUser.FromSqlInterpolated($"Exec [login].[SP_GET_INFO_USER] @idUsuario={IdUsuario}").ToListAsync();
-              InfoUser infoUser= infoUserList.First();
-              var user = new User
-              {
+            IEnumerable<InfoUser> infoUserList = (IEnumerable<InfoUser>)await context.InfoUser.FromSqlInterpolated($"Exec [login].[SP_GET_INFO_USER] @idUsuario={IdUsuario}").ToListAsync();
+            InfoUser infoUser = infoUserList.First();
+            var user = new User
+            {
                 Uuid = infoUser.Uuid.ToString(),
                 Role = "admin",
                 Data = new UserData
                 {
-                  DisplayName = infoUser.DisplayName,
-                  PhotoURL = infoUser.PhotoUrl,
-                  Email = infoUser.Email ,
-                  Settings = new UserSettings
-                  {
-                    // Rellena los ajustes del usuario aquí
-                  },
-                  Shortcuts = new List<string>
+                    DisplayName = infoUser.DisplayName,
+                    PhotoURL = infoUser.PhotoUrl,
+                    Email = infoUser.Email,
+                    Settings = new UserSettings
+                    {
+                        // Rellena los ajustes del usuario aquí
+                    },
+                    Shortcuts = new List<string>
                     {
                         "apps.calendar",
                         "apps.mailbox",
                         "apps.contacts"
                     }
                 }
-              };
-              return user;
+            };
+            return user;
         }
 
 

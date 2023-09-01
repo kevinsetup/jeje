@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace backendpedidofigueri.Entity.Historial
 {
@@ -12,8 +13,12 @@ namespace backendpedidofigueri.Entity.Historial
         public string? IdPrecio { get; set; }
         public Double? ValorProducto { get; set; }
         public string? IdCliente { get; set; }
+        [NotMapped]
         public string? Imagen { get; set; }
-        public string? ultimos_pedidos { get; set; }
+        public string? ImagenRuta { get; set; }
+        public Double? Cantidad1 { get; set; }
+        public Double? Cantidad2 { get; set; }
+        public Double? Cantidad3 { get; set; }
 
     }
 }

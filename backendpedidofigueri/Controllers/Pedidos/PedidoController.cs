@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using backendpedidofigueri.Entity.Rol.Vendedor;
 using backendpedidofigueri.Entity.Credito;
 using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Hosting;
 
 public class SavePedido
 {
@@ -31,10 +32,14 @@ namespace backendpedidofigueri.Controllers.Pedidos
         private DbContextS context;
         private Status status = new Status();
         private readonly IConfiguration configuration;
-        public PedidoController(DbContextS _context, IConfiguration _configuration)
+        private IWebHostEnvironment webHostEnvironment;
+
+        public PedidoController(DbContextS _context, IConfiguration _configuration, IWebHostEnvironment _webHostEnvironment)
         {
             context = _context;
             configuration = _configuration;
+            webHostEnvironment = _webHostEnvironment;
+
         }
         public class DatosCombinados
         {
@@ -76,6 +81,15 @@ namespace backendpedidofigueri.Controllers.Pedidos
         public async Task<ActionResult> GetDetallePedido(string IdRegistroPedido, bool hasPermission)
         {
             var result = await context.GetDetallePedido.FromSqlInterpolated($"Exec [pedido].[sp_obtener_detalle_pedido_por_id] @IdRegistroPedido={IdRegistroPedido}, @PermisoVerMonto={hasPermission}").ToListAsync();
+            result.ForEach(x =>
+            {
+                if(x.ImagenRuta != null)
+                {
+                    x.Imagen = "data:image/jpg;base64," + Convert.ToBase64String(System.IO.File.ReadAllBytes(webHostEnvironment.WebRootPath + x.ImagenRuta));
+
+                }
+            });
+
 
             return StatusCode(200, new ItemResp
             {

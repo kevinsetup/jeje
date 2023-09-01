@@ -1,5 +1,6 @@
 ﻿
 using Azure;
+using backendpedidofigueri.Entity.ArchiveManager;
 using backendpedidofigueri.Entity.Credito;
 using backendpedidofigueri.Entity.DireccionEnvio;
 using backendpedidofigueri.Entity.Historial;
@@ -65,9 +66,13 @@ public class DbContextS : DbContext
 
     public DbSet<DiasInfoDto> DiasInfoDto { get; set; }
 
+    //Productos
     public DbSet<Producto> Producto { get; set; }
+    public DbSet<Catalogo> Catalogo { get; set; }
 
 
+    //Archive Manager
+    public DbSet<ArchiveManagers> ArchiveManagers { get; set; }
 
 
 

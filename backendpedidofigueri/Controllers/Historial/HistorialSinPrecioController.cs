@@ -19,13 +19,16 @@ namespace backendpedidofigueri.Controllers.Historial
         private DbContextS context;
         private Status status = new Status();
         private readonly IConfiguration configuration;
+        private IWebHostEnvironment webHostEnvironment;
 
-        public HistorialSinPrecioController(DbContextS _context)
+        public HistorialSinPrecioController(DbContextS _context, IWebHostEnvironment _webHostEnvironment)
         {
             context = _context;
+            webHostEnvironment = _webHostEnvironment;
+
         }
 
-   
+
 
         [HttpGet("GetHistorial")]
     public async Task<ActionResult> GetHistorial(bool hasPermission)
@@ -35,6 +38,15 @@ namespace backendpedidofigueri.Controllers.Historial
 
 
             List<HistorialSinPrecio> data = await context.HistorialSinPrecio.FromSqlInterpolated($"Exec [dbo].[sp_listarProductoCliente] @idCliente={IdCliente},@idSector={IdSector}, @PermisoVerMonto={hasPermission}").ToListAsync();
+            data.ForEach(x =>
+            {
+                if (x.ImagenRuta != null)
+                {
+                    x.Imagen = "data:image/jpg;base64," + Convert.ToBase64String(System.IO.File.ReadAllBytes(webHostEnvironment.WebRootPath + x.ImagenRuta));
+
+                }
+            });
+
 
             return StatusCode(200, new ItemResp { status = 200, message = status.CONFIRM, data = data });
 
