@@ -1,6 +1,7 @@
 ﻿
 using Azure;
 using backendpedidofigueri.Entity.Credito;
+using backendpedidofigueri.Entity.DatosPersonales;
 using backendpedidofigueri.Entity.DireccionEnvio;
 using backendpedidofigueri.Entity.Historial;
 using backendpedidofigueri.Entity.Login;
@@ -67,7 +68,8 @@ public class DbContextS : DbContext
 
     public DbSet<Producto> Producto { get; set; }
 
-
+    //datosPersonales
+    public DbSet<DatosPersonales> DatosPersonales { get; set;}
 
 
 

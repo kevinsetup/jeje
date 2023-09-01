@@ -236,6 +236,12 @@ namespace backendpedidofigueri.Controllers.Login
             });
         }
 
+
+
+
+
+
+
         private NavigationNode ProcessNode(IEnumerable<Navigation> navigation, Navigation node)
         {
             var children = navigation.Where(x => x.IdFuncionSuper == node.IdFuncion)
