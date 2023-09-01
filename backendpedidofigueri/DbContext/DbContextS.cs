@@ -2,6 +2,7 @@
 using Azure;
 using backendpedidofigueri.Entity.ArchiveManager;
 using backendpedidofigueri.Entity.Credito;
+using backendpedidofigueri.Entity.DatosPersonales;
 using backendpedidofigueri.Entity.DireccionEnvio;
 using backendpedidofigueri.Entity.Historial;
 using backendpedidofigueri.Entity.Login;
@@ -73,6 +74,8 @@ public class DbContextS : DbContext
 
     //Archive Manager
     public DbSet<ArchiveManagers> ArchiveManagers { get; set; }
+    //datosPersonales
+    public DbSet<DatosPersonales> DatosPersonales { get; set;}
 
 
 
