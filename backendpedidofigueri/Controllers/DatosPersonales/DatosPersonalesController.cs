@@ -80,7 +80,7 @@ namespace backendpedidofigueri.Controllers.Datos
                 // Comprueba si la contraseña actual proporcionada coincide con la descifrada
                 if (contraseñaDescifrada != request.ContraseñaActual)
                 {
-                    return StatusCode(200, new { status = 200, message = "Contraseña actual incorrecta" });
+                    return StatusCode(200, new { status = 500, message = "Contraseña actual incorrecta" });
                 }
 
                 // Cifra la nueva contraseña
@@ -89,11 +89,11 @@ namespace backendpedidofigueri.Controllers.Datos
                 // Llama al procedimiento almacenado para actualizar la contraseña
                 await context.Database.ExecuteSqlInterpolatedAsync($"EXEC sp_CambiarContraseña @idUsuario={IdUsuario}, @nuevaContraseña={contraseñaCifrada}");
 
-                return StatusCode(200, new { status = 404, message = "Contraseña actualizada correctamente" });
+                return StatusCode(200, new { status = 200, message = "Contraseña actualizada correctamente" });
             }
             catch (Exception ex)
             {
-                return StatusCode(200, new { status = 404, message = "Error al actualizar la contraseña", error = ex.Message });
+                return StatusCode(200, new { status = 500, message = "Error al actualizar la contraseña", error = ex.Message });
             }
         }
 
