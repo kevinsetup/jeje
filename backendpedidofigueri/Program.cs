@@ -13,7 +13,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 //Start Cors configuration
-builder.Services.AddCors(options => options.AddDefaultPolicy(builder => builder.WithOrigins("http://localhost:3000", "http://192.168.10.3:9099", "https://192.168.10.3:9099", "https://192.168.10.3:7233", "https://192.168.10.3:7233", "http://localhost:9012", "https://localhost:9012", "https://developer:9012", "http://developer:9012", "https://26.248.51.202:9012", "http://26.248.51.202:9012", "https://26.126.142.213:9012", "http://26.126.142.213:9012").AllowAnyHeader().AllowAnyMethod()));
+builder.Services.AddCors(options => options.AddDefaultPolicy(builder => builder.WithOrigins("http://localhost:3000", "http://192.168.10.3:9099", "https://192.168.10.3:9099", "https://192.168.10.3:7233", "https://192.168.10.3:7233", "http://localhost:9012", "https://localhost:9012", "https://developer:9012", "http://developer:9012", "https://26.248.51.202:9012", "http://26.248.51.202:9012", "https://26.126.142.213:9012", "http://26.126.142.213:9012", "http://localhost:8070").AllowAnyHeader().AllowAnyMethod()));
 builder.Services.AddControllers();
 //End Cors configuration
 
