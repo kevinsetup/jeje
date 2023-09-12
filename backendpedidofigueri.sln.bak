@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "backendpedidofigueri", "backendpedidofigueri\backendpedidofigueri.csproj", "{8F792E21-93F9-408B-A795-E1F6361F3E2E}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "react", "reactapp\react.esproj", "{BE9CDEC5-9722-4852-B85E-4779BBD5CBB5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8F792E21-93F9-408B-A795-E1F6361F3E2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F792E21-93F9-408B-A795-E1F6361F3E2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F792E21-93F9-408B-A795-E1F6361F3E2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F792E21-93F9-408B-A795-E1F6361F3E2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE9CDEC5-9722-4852-B85E-4779BBD5CBB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE9CDEC5-9722-4852-B85E-4779BBD5CBB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE9CDEC5-9722-4852-B85E-4779BBD5CBB5}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{BE9CDEC5-9722-4852-B85E-4779BBD5CBB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE9CDEC5-9722-4852-B85E-4779BBD5CBB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE9CDEC5-9722-4852-B85E-4779BBD5CBB5}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {837EA55C-856E-4A3A-9602-CBDBF873446F}
+	EndGlobalSection
+EndGlobal
